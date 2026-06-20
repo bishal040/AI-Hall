@@ -24,7 +24,12 @@ This index synthesizes the findings from 17 recent research papers surrounding t
 - **[User's Manual Excel Research Notes](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/user_research_notes.md)**
 - **[TRACE Framework Solution](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/proposed_solution.md)**
 - **[T.I.M.E. Visionary Architecture](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/visionary_solution.md)**
-- **[PROBE Architecture Solution (Highly Recommended)](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/probe_solution.md)**
+- **[PROBE Architecture Solution](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/probe_solution.md)**
+- **[⭐ SHADOW Framework](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/shadow_solution.md)**
+- **[🏆 AEGIS Framework — Near-Zero Hallucination](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/aegis_solution.md)**
+- **[🔧 FLARE System — Most Practical / Buildable](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/flare_solution.md)**
+- **[🌍 Hallucination PREDICTION — The World Problem](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/hallucination_prediction_problem.md)**
+- **[💎 EVP — The Universal Hallucination Solution](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/evp_solution.md)**
 
 ---
 
