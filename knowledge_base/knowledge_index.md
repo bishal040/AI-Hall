@@ -30,6 +30,7 @@ This index synthesizes the findings from 17 recent research papers surrounding t
 - **[🔧 FLARE System — Most Practical / Buildable](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/flare_solution.md)**
 - **[🌍 Hallucination PREDICTION — The World Problem](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/hallucination_prediction_problem.md)**
 - **[💎 EVP — The Universal Hallucination Solution](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/evp_solution.md)**
+- **[🏗️ CPV — Constrained Property-Based Verification (Production-Grade)](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/cpv_solution.md)**
 
 ---
 
