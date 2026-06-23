@@ -1,0 +1,206 @@
+A Systematic Literature Review of Code Hallucinations in
+LLMs: Characterization, Mitigation Methods, Challenges, and
+Future Directions for Reliable AI
+CUIYUN GAO, Harbin Institute of Technology, China
+GUODONG FAN∗, Shandong Agriculture and Engineering University, China
+CHUN YONG CHONG, Monash University Malaysia, Malaysia
+SHIZHAN CHEN, Tianjin University, China
+CHAO LIU, Chongqing University, China
+DAVID LO, Singapore Management University, Singapore
+ZIBIN ZHENG, Sun Yat-sen University, China
+QING LIAO, Harbin Institute of Technology, China
+Model hallucination is one of the most critical challenges faced by Large Language Models (LLMs), especially in
+high-stakes code intelligence tasks. As LLMs become increasingly integrated into software engineering tasks,
+understanding and mitigating hallucination in code becomes essential. In this survey, we provide a systematic
+review of hallucination phenomena in code-oriented LLMs from four key perspectives. First, we begin by
+surveying 60 papers to define hallucination in the context of code and summarize its primary causes, such as
+data noise, exposure bias, and insufficient semantic grounding, while also tracing recent trends in literature
+across natural language processing (NLP) and software engineering communities. Second, we review model
+hallucination surveys in a broader span and summarize representative hallucination mitigation strategies, such
+as knowledge-enhanced generation, constrained decoding, and post-editing. Third, we review approaches
+targeted for code intelligence and highlight code-specific challenges that aggravate hallucination, including
+syntax sensitivity, strict type systems, and dependence on external libraries. Meanwhile, we analyze how
+emerging code intelligence tasks, e.g., program analysis, symbolic execution, and unit testing, are utilized
+to detect and mitigate hallucinations. Fourth, we summarize current evaluation benchmarks, ranging from
+static metrics to dynamic checks, e.g., compilation and execution correctness, and emphasize the need for
+hallucination-oriented benchmarks. Finally, we highlight several key challenges and future directions. We
+explore the subtle balance between hallucination and generalization, and distinguish hallucinations from
+ordinary functional errors. As hallucinations often reveal LLMs’ issues, we point out the challenges posed
+by private codebases, where the lack of public data makes hallucinations harder to detect and correct. This
+paper lays the foundations and outlines the pathways toward reliable AI by focusing on the understanding,
+evaluation, and mitigation of hallucinations in code LLMs.
+CCS Concepts: • Software and its engineering; • Computing methodologies →Artificial intelligence;
+∗Corresponding author.
+Authors’ Contact Information: Cuiyun Gao, Harbin Institute of Technology, Shenzhen, China, gaocuiyun@hit.edu.cn;
+Guodong Fan, Shandong Agriculture and Engineering University, Zibo, China, guodong.fan@126.com; Chun Yong Chong,
+Monash University Malaysia, Bandar Sunway, Malaysia, chunyong@ieee.org; Shizhan Chen, shizhan@tju.edu.cn, Tianjin
+University, Tianjin, China; Chao Liu, liu.chao@cqu.edu.cn, Chongqing University, Chongqing, China; David Lo, davidlo@
+smu.edu.sg, Singapore Management University, Singapore, Singapore; Zibin Zheng, Sun Yat-sen University, Guangzhou,
+China, zhzibin@mail.sysu.edu.cn; Qing Liao, Harbin Institute of Technology, Shenzhen, China, liaoqing@hit.edu.cn.
+Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee
+provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and
+the full citation on the first page. Copyrights for components of this work owned by others than ACM must be honored.
+Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires
+prior specific permission and/or a fee. Request permissions from permissions@acm.org.
+© 2025 ACM.
+ACM 1557-7392/2025/10-ART1
+https://doi.org/
+ACM Trans. Softw. Eng. Methodol., Vol. 1, No. 1, Article 1. Publication date: October 2025.
+arXiv:2511.00776v1  [cs.SE]  2 Nov 2025
+1:2
+Gao et al.
+Additional Key Words and Phrases: large language models, code hallucination, reliable AI
+ACM Reference Format:
+Cuiyun Gao, Guodong Fan, Chun Yong Chong, Shizhan Chen, Chao Liu, David Lo, Zibin Zheng, and Qing
+Liao. 2025. A Systematic Literature Review of Code Hallucinations in LLMs: Characterization, Mitigation
+Methods, Challenges, and Future Directions for Reliable AI. ACM Trans. Softw. Eng. Methodol. 1, 1, Article 1
+(October 2025), 43 pages.
+1
+Introduction
+Large language models (LLMs) demonstrate impressive capabilities in code-related tasks, such as
+code summarization [22], generation [54], and completion [49]. However, LLMs are also prone
+to producing outputs that are syntactically correct and plausible, yet factually incorrect, non-
+executable, or inconsistent with the input intent, referred to as hallucinations. The concept of
+hallucinations is originally derived from psychology and widely adopted in artificial intelligence to
+describe the phenomenon where models produce outputs that lack grounding in input or reality [86].
+While hallucinations are often seen as errors to be eliminated, some studies argue that they are
+an inherent byproduct of generative inference mechanisms [114, 139]. The hallucinations pose
+significant challenges to the adoption, safety, and reliability of AI systems across various domains.
+Understanding the hallucinations remains a major challenge due to issues such as ambiguity in
+the field of Natural Language (NL), including programming language (PL). With the rapid develop-
+ment of LLMs, the generated text by LLMs reaches or even surpasses human-level performance
+on many tasks, e.g., annotation [131] and judgment [129]. However, hallucinations remain a per-
+sistent and serious challenge. For example, models may fabricate citations or invent non-existent
+objects, significantly undermining user trust in AI systems. Code-intelligence tasks face the same
+risk [78, 154], but with domain-specific stakes. Code is governed by strict syntactic and semantic
+constraints, depends on modular components, proceeds through multi-stage build/test pipelines,
+and must execute. These properties reflect a core distinction: natural language targets human
+interpretation, whereas PLs must be unambiguously parsed and executed by machines while re-
+maining comprehensible to humans [3, 12]. Although PLs have stronger grammatical constraints
+and are largely characterized by context-free grammars modeled by pushdown automata (PDAs),
+PLs exhibit stronger domain specificity [105]. As a result, hallucinations in this context can lead to
+more severe consequences, such as compilation errors and security vulnerabilities. As shown in
+Fig. 1, from the perspective of the workflow, code intelligence approaches often involve four main
+stages: retrieval-augmented generation (RAG) [31], model fine-tuning [8], various chain-of-thought
+reasoning [146], and iterative refinement [27].
+While many literature reviews exist in the field of NL [46, 55, 124], there are few literature reviews
+on hallucination considering code intelligence tasks. Lee et al. [67] review hallucination by code
+generation LLMs, categorize types of hallucinations in the code generated by CodeLLMs, review
+existing benchmarks and mitigation strategies, and identify open challenges. Different from Lee’s
+work, our study offers four advantages. First, we not only examine hallucinations in code generation
+but also extend our analysis to a wider range of code intelligence tasks, including code summariza-
+tion, completion, and reasoning. Second, we adopt a cross-disciplinary lens integrating both NLP
+and software engineering viewpoints. Third, we conduct fine-grained analyses of hallucination
+causes and manifestations, expanding the discussion to architectural and semantic levels, such as
+modularity and design pattern violations. Last but not least, our study emphasizes the interplay
+between mitigation methods and hallucination, offering a more comprehensive understanding of
+this phenomenon across various tasks. Overall, we investigate the unique characteristics of PLs
+and conduct a systematic review of research related to hallucinations. Then, we analyze literature
+trends, clarify the definition and underlying causes of hallucinations, and summarize representative
+ACM Trans. Softw. Eng. Methodol., Vol. 1, No. 1, Article 1. Publication date: October 2025.
+A Systematic Literature Review of Code Hallucinations in LLMs: Characterization, Mitigation Methods, Challenges, and
+Future Directions for Reliable AI
+1:3
+LLMs
+
+
+
+
+
+
+def get_handler(p_ver):
+  from ._bolt3 
+  import SyncBolt3
+  SyncBolt3.handler() ...
+Error
+Ok
+Iteration
+Input
+…
+Output
+CoT
+Input
+Code 
+Repository
+Final Output
+FT
+Output
+Feedback
+Training 
+Data
+
+
+Reliable?
+Fig. 1. A General Workflow of Code Intelligence. Step 1: User input; Step 2: retrieval-augmented generation
+incorporates external code and documentation to enrich knowledge; Step 3: model fine-tuning adapts pre-
+trained models to code-specific tasks and domains; Step 4: chain-of-thought reasoning enhances multi-step
+reasoning with structured techniques such as tree-of-thought; Step 5: iterative refinement corrects errors
+and repairs code; Step 6: verification results, corrections, and route back to earlier fine-tuning stages; Step 7:
+routed back to earlier CoT stages. and Step 8: the system delivers the final output.
+approaches in both NLP and code intelligence domains. Special attention is given to the unique
+challenges introduced by the structural and executable nature of code. Finally, we discuss open
+challenges and future opportunities toward building more reliable code intelligence systems.
+To perform a systematic review of this domain, we identified 60 relevant studies from three
+widely used electronic databases, including ACM Digital Library, IEEEXplore, and Web of Science.
+These databases are selected due to their broad coverage of high-quality publications in the fields
+of computer science and software engineering. The search processes involve formulating precise
+search strings based on key terms related to the hallucinations of LLMs, following the prior
+studies [76, 145]. We apply a set of inclusion and exclusion criteria to ensure the relevance and
+quality of the selected studies, with details provided in Section 3. The final set of studies serves as
+the foundation for analyzing the current landscape, identifying trends, and uncovering research
+gaps in this area. We aim at investigating the following research questions (RQs) in this study:
+• RQ1: What are the definitions, causes, and literature trends of hallucinations spe-
+cially in code intelligence? Hallucinations in code refer to outputs that are syntactically
+correct but semantically incorrect, non-executable, or inconsistent with the input intent.
+They often stem from insufficient supervision, domain mismatch, or over-generalization.
+Recent studies attempt to define taxonomy, explore causal mechanisms, and analyze the
+increasing focus on this phenomenon in code-related tasks.
+• RQ2: How are hallucination mitigation methods in NLP developed and categorized?
+Various mitigation techniques, such as retrieval-augmented generation (RAG), instruction
+ACM Trans. Softw. Eng. Methodol., Vol. 1, No. 1, Article 1. Publication date: October 2025.
+1:4
+Gao et al.
+tuning, and self-consistency decoding, are adapted from NLP to reduce hallucinations. These
+approaches improve grounding and alignment with intent. However, adapting them to the
+code domain requires addressing domain-specific issues, e.g., structural and execution nature.
+• RQ3: How are hallucination mitigation techniques adapted to address code-specific
+challenges? Code-specific approaches include syntax-aware decoding, static analysis, execution-
+based feedback, and test-case validation. Techniques such as constraint-guided generation,
+compiler-based verification, and structured prompting are used to enforce correctness and
+reduce unsafe outputs. These methods are often tailored to account for the executable nature
+of code and strict syntactic semantics.
+• RQ4: What benchmarks and metrics are used to evaluate hallucinations in code intel-
+ligence tasks? Several benchmarks, including CodeHaluEval [123] and HALLUCODE [77],
+provide labeled data for evaluating hallucinations in code generation. Evaluation metrics
+range from exact match and functional correctness, e.g., pass@k, to hallucination-specific
+metrics, e.g., API precision and inconsistency rate. Nevertheless, there is a need for unified
+evaluation protocols and comprehensive multi-domain benchmarks.
+Based on the findings discussed in all reviewed studies, we observe many challenges in the
+existing AI systems for code intelligence. These challenges provide opportunities for further research
+studies, for example:
+• The difference between hallucination and mistake. Distinguishing hallucinations
+from ordinary errors remains difficult, as both may manifest as incorrect outputs, but only
+hallucinations involve confident yet unfounded generation.
+• Confidence vs. Hallucination in LLMs. High model confidence does not always indicate
+factual correctness, and overconfidence can increase the likelihood of hallucinations going
+undetected.
+• The relationship between hallucinations and generalization ability. While some
+degree of generalization is necessary for flexible reasoning, it also increases the risk of
+hallucination when the model extrapolates beyond its training data.
+• The challenge of private data. Hallucinations are more likely to occur in scenarios
+involving private codebases or proprietary APIs, where the model lacks sufficient exposure
+or training data, leading to unsupported or fabricated outputs.
+The main contributions of this study are as follows:
+• We present a cross-domain systematic review of hallucination research spanning NLP and
+code intelligence, unifying terminology and analyzing representative failure modes.
+• We summarize representative methods for hallucination detection and mitigation in both
+NLP and code domains, highlighting their strengths and limitations.
+• We identify and analyze the unique challenges of hallucinations in code-related tasks, em-
+phasizing the structural and executable nature of PLs.
+• We highlight challenges and opportunities for research studies, including the distinction
+between hallucinations and genuine errors, the influence of model confidence, and the tension
+between generalization and factual accuracy.
+The remainder of the paper is structured as follows. Section 2 provides background on hal-
+lucinations in the context of code generation. Section 3 details the methodology employed in
+our systematic literature review. Section 4 addresses RQ1 by defining code-related hallucinations,
+ana

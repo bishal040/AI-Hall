@@ -1,0 +1,266 @@
+A Yannakakis-type theorem for lifts of affine semigroups
+Jo˜ao Gouveia∗
+Amy Wiebe†
+Abstract
+Yannakakis’ theorem relating the extension complexity of a polytope to the size of
+a nonnegative factorization of its slack matrix is a seminal result in the study of lifts of
+convex sets. Inspired by this result and the importance of lifts in the setting of integer
+programming, we show that a similar result holds for the discrete analog of convex
+polyhedral cones—affine semigroups. We define the notions of the integer slack matrix
+and a lift of an affine semigroup. We show that many of the characterizations of the
+slack matrix in the convex cone setting have analogous results in the affine semigroup
+setting. We also show how slack matrices of affine semigroups can be used to obtain
+new results in the study of nonnegative integer rank of nonnegative integer matrices.
+1
+Introduction
+A considerable body of work exists studying the possible approaches for dealing with
+integer linear programs. A commonly used procedure is to replace the discrete feasible set
+by its convex hull and try to find a suitable compact description of that hull or, at least,
+a relaxation of it. In order to find such a description, we often resorts to lifts; that is, we
+define a higher dimensional set that projects onto the set we are interested in and that has,
+in some sense, a small description. This general framework is popular both in theory and
+in practice and has provided deep insights into several important problems.
+Conceptually, one can think of this approach as a two-step process: first we go from the
+discrete setting to the convex setting, and there we use a lifting procedure. The motivation
+for the present paper stems from a simple question, apparently unaddressed by the existing
+body of literature: what happens if we try to bypass one of the steps and immediately define
+a lift that respects the structure of the integer points within the original feasible region? In
+∗CMUC, Department of Mathematics, University of Coimbra, 3001-454 Coimbra, Portugal. This au-
+thor was partially supported by Centro de Matem´atica da Universidade de Coimbra (CMUC), funded
+by the Portuguese Government through FCT/MCTES, DOI 10.54499/UIDB/00324/2020. Email: jgou-
+veia@mat.uc.pt.
+†Department of Mathematics, University of British Columbia, Kelowna, British Columbia, V1V 1V7,
+Canada. This author was partially funded by the Natural Sciences and Engineering Research Council of
+Canada (cette recherche est partiellement financ´ee par le Conseil de recherches en sciences naturelles et en
+g´enie du Canada), Discovery Grant #2024-04643. Email: amy.wiebe@ubc.ca.
+1
+arXiv:2407.14764v1  [math.CO]  20 Jul 2024
+this work we attempt to set up the machinery needed to address this question, and take the
+first steps in establishing a theory of discrete lifts, obtaining some interesting byproducts
+in the process.
+The natural objects to focus on when attempting such a task are affine semigroups.
+They are the discrete analog of convex polyhedral cones, and play an important role in the
+theory of integer programming. Thus, it makes sense to begin by exploring how the tools
+used in the study of convex cones may be expanded to this discrete setting. Moreover, affine
+semigroups appear as objects of importance in a variety of other areas including algebraic
+geometry, commutative algebra, number theory, and combinatorics. This suggests that any
+results obtained will have interesting interpretations in other domains of mathematics.
+The central result in the study of lifts of convex sets is Yannakakis’ theorem [Yan91]
+and its variants.
+Associated to any polyhedral convex cone there exists a nonnegative
+matrix, called its slack matrix, that consists of the evaluations of a set of representatives
+of the extreme rays of the dual cone at a set of representatives of the extreme rays of the
+cone itself. In its polyhedral convex cone version, Yannakakis’ theorem states that we can
+write a polyhedral cone as a projection of a polyhedral cone with k facets if and only if
+we can factorize its slack matrix as a product of two nonnegative matrices with the inner
+dimension of the product being k.
+In order to get a discrete version of this result we must start by defining a notion of
+slack matrix for affine semigroups. Slack matrices of polyhedral cones are an interesting
+class of nonnegative matrices in their own right. They have been studied in detail, for
+example in [GGK+13], and offer canonical representations for cones that can be used for
+the study of realization spaces of polytopes [GMTW19]. We show that the integer slack
+matrices we define satisfy many of the characterizations of general slack matrices of cones,
+and also present a canonical representation of the semigroup. Armed with this new notion,
+we proceed to introduce a definition for a lift of an affine semigroup. Again, we are inspired
+by the notion of a lift for polyhedral cones.
+Our main result is that a Yannakakis-type theorem also holds in the affine semigroup
+setting. More precisely, the minimal size of a lift of a semigroup equals the nonnegative
+integer rank of its slack matrix. We briefly explore the potential of interpreting this result
+in the settings of integer programming and toric geometry. The notion of nonnegative
+integer rank is not new, and there have been some limited previous results from a matrix
+theory point of view. We end the paper by exploiting the structure of slack matrices of
+2-dimensional semigroups to get new results in the study of nonnegative integer rank of a
+matrix.
+The remainder of this paper is organized as follows. In Section 2, we provide some
+background and notation for working with affine semigroups. In Section 3, we introduce
+the notion of the slack matrix of an affine semigroup and give some characterizations of
+these matrices following [GGK+13]. In Section 4, we define the lift of an affine semigroup
+and present a Yannakakis-type theorem relating lifts of affine semigroups to factorizations
+of their slack matrices. We also include some discussion on the application of these lifts to
+2
+Figure 1: Lattice of Example 2.1 and its dual.
+toric geometry and integer programming. Finally, in Section 5, we use slack matrices of
+2-dimensional affine semigroups to provide new results on the nonnegative integer rank of
+nonnegative integer matrices. Section 6 concludes the work with some remaining questions.
+2
+Background and definitions
+A lattice in Rn is a discrete additive subgroup of Rn, i.e., a set Λ ∈Rn such that x −y ∈Λ
+for all x, y ∈Λ and every element of Λ is isolated. The most important example of such
+a lattice is Zn. A basis of a lattice is a set of linearly independent vectors {v1, ..., vd} ∈Λ
+such that
+Λ = {m1v1 + m2v2 + · · · + mdvd | m1, m2, ..., md ∈Z}.
+The dual lattice to Λ is the lattice
+Λ∗= {w ∈span(Λ) | ⟨w, v⟩∈Z, for all v ∈Λ}.
+Example 2.1. Consider the lattice Λ = {(x, y) ∈Z2 | x + y ∈2Z}. A basis for this lattice
+is, for instance, B = {(2, 0), (1, −1)}. Its dual is the lattice
+Λ∗= {(a, b) ∈R2 : ax + by ∈Z, for all (x, y) ∈Λ} = {(a, b) ∈(Z/2)2 | a + b ∈Z}.
+In Figure 1 we can see both primal and dual lattices.
+We are interested in affine semigroups. We can think of these as sets Γ ∈Rn that are
+closed under addition, contain 0, and are finitely generated with the additional property
+that the set ΛΓ = {x −y | x, y ∈Γ} is a lattice. In other words, sets of the form
+Γ = {m1v1 + m2v2 + · · · + mkvk | m1, m2, ..., mk ∈Z+}
+for some v1, ..., vk ∈Rn, not necessarily linearly independent, such that
+ΛΓ = {m1v1 + m2v2 + · · · + mkvk | m1, m2, ..., mk ∈Z}
+3
+Figure 2: Affine semigroup of Example 2.2 with its associated lattice and cone.
+is a lattice, i.e., it has no accumulation points.
+Associated to any affine semigroup Γ, there is the cone of all real nonnegative combi-
+nations of elements of Γ. In other words,
+KΓ = {λ1v1 + λ2v2 + · · · + λkvk | λ1, λ2, ..., λk ∈R+}
+where v1, ..., vk span Γ. Note that Γ ⊆ΛΓ ∩KΓ. Moreover, Gordan’s Lemma guarantees
+that ΛΓ ∩KΓ is finitely generated, and hence is also an affine semigroup. We call this
+semigroup the normalization of Γ and denote it by Γ. An affine semigroup Γ is said to be
+normal if Γ = Γ,
+Example 2.2. Consider the affine semigroup Γ generated by {(1, 0), (1, 1), (3/2, 3/2)}.
+Then, ΛΓ = {(a, b) ∈(Z/2)2 | a + b ∈Z}, the same as the dual lattice in Example 2.1.
+Moreover KΓ is the cone spanned by (1, 0) and (1, 1). In Figure 2 we can see the semigroup,
+its lattice and its cone. We can see that Γ ̸= Γ, since there are points in KΓ ∩ΛΓ that are
+not in Γ, hence this affine semigroup is not normal.
+Affine semigroups are a discrete counterpart to convex cones, which have a rich theory
+of duality. We wish to explore how this duality translates to the discrete setting. The dual
+of a convex cone K ⊆Rn is the set K∗= {y ∈Rn | ⟨x, y⟩≥0 for all x ∈K}, which we
+can identify as the set of linear operators wich take nonnegative values on K, i.e, with the
+homomorphism cone Hom(K, R+).
+A simple idea to generalize this is then to define the dual of an affine semigroup Γ as
+Γ∗= Λ∗
+Γ ∩K∗
+Γ,
+which can be identified as Hom(Γ, Z+). This is the definition seen, for instance, in [RGS99].
+However, this definition is not always straightforward.
+Example 2.3. Consider Γ = Zn.
+Then ΛΓ = Λ∗
+Γ = Γ and KΓ = Rn which implies
+K∗
+Γ = {0}, so Γ∗= {0}. By our definitions ΛΓ∗= Γ∗= {0}, and therefore (Γ∗)∗= {0}.
+4
+The main issue here is that we would like both primal and dual cones to be full di-
+mensional. This ensures that the intersection of the lattice with the cone contains a set of
+generators for the lattice. The primal cone ambient space is the span of the lattice, so it is
+always full dimensional. In order to guarantee that the dual cone is also full dimensional
+we need to enforce that the primal cone is pointed, i.e, that it contains no lines. This is
+the same as enforcing that the affine semigroup Γp is positive, i.e., zero is the only element
+x ∈Γp such that −x ∈Γp.
+Lemma 2.4. Given a positive affine semigroup Γ ⊂Rn, we have:
+1. KΓ∗= K∗
+Γ
+2. ΛΓ∗= Λ∗
+Γ;
+3. (Γ∗)∗= Γ;
+4. If Γ is normal, (Γ∗)∗= Γ.
+Proof. For (1) the first thing we have to note is that KΓ always has the same dimension
+as the span of ΛΓ, since by definition it contains a basis of that space. Furthermore, it
+is pointed by the positivity of Γ, hence the basic properties of convex cones tell us that
+K∗
+Γ is also a pointed full-dimensional cone. Note that Γ∗⊆K∗
+Γ by definition so we have
+KΓ∗⊆K∗
+Γ . Furthermore, the dual of a rational cone is always rational itself, so there is a
+collection of points in Λ∗
+Γ that generate the cone K∗
+Γ. By definition these points belong to
+Γ∗, and so we have the inclusion K∗
+Γ ⊆KΓ∗.
+For (2), since K∗
+Γ has an open interior it contains arbitrarily large open balls centered
+around lattice points. That means that given some generating set for Λ∗
+Γ we can find a
+lattice translate of it that is entirely inside K∗
+Γ, which means it is part of Γ∗. Hence Λ∗
+Γ is
+contained in ΛΓ∗and since the other inclusion is direct from definition we have the second
+statement.
+From these first two results, (3) follows immediately since (Γ∗)∗= (KΓ∗)∗∩(ΛΓ∗)∗.
+Then by (1), (KΓ∗)∗= KΓ, and by (2), (ΛΓ∗)∗= (Λ∗
+Γ)∗= ΛΓ, where the last equality
+follows from basic lattice theory.
+The last statement follows immediately from (3).
+Lemma 2.4 shows that when restricted to positive normal affine semigroups, this defini-
+tion of the dual affine semigroup is nicely symmetric. However, if we consider non-normal
+affine semigroups, we lose symmetry: while every affine semigroup has a dual, not every
+affine semigroup is a dual of another affine semigroup. One could sacrifice the unicity of the
+dual to fix this shortcoming but in this paper we will content ourselves to lose symmetry
+and work with this more straightforward definition.
+Example 2.5. Let us revisit the affine semigroup of Example 2.2. The dual lattice to ΛΓ
+is Λ∗
+Γ = {(x, y) ∈Z2 | x + y ∈2Z}, as we saw in Example 2.1. The dual cone to KΓ is
+5
+Figure 3: Affine semigroup of Example 2.5 its associated lattice and cone.
+the cone K∗
+Γ that is spanned by (0, 1) and (1, −1). Now Γ∗is the normal affine semigroup
+obtained by intersecting Λ∗
+Γ and K∗
+Γ, i.e., the normal semigroup generated by (0, 2) and
+(1, −1), represented in Figure 3.
+3
+Slack matrix of a positive affine semigroup
+In what follows, we will restrict ourselves to positive affine semigroups, so that the conclu-
+sions of Lemma 2.4 always hold. Another nice consequence of enforcing positivity is the
+following fact, found for instance in [BK01].
+Lemma 3.1. A positive affine semigroup has a unique minimal generating set.
+This means that we can associate to any positive affine semigroup Γ a unique (up to
+row and column permutations) nonnegative integer matrix in the following way.
+Definition 3.2. Let Γ be a positive affine semigroup. Let a1, ..., ak and b1, ..., bl be the
+sets of minimal generators of Γ and Γ∗, respectively. We define the slack matrix of Γ as
+the nonnegative integer matrix SΓ ∈Zk×l
++
+whose (i, j)-entry is ⟨ai, bj⟩.
+Note the generators of a positive affine semigroup Γ must include generators of the rays
+of the cone KΓ. Thus the slack matrix SΓ is a slack matrix of KΓ in the sense of slack
+matrices of convex cones (see [GGK+13]), possibly with redundant rows and columns.
+Example 3.3. Let us revisit the affine group Γ generated by {(1, 0), (1, 1), (3/2, 3/2)},
+introduced in Example 2.2. It is simple to check this is indeed the minimal set of generators.
+Furthermore, by Example 2.5 we know that its dual is generated by (0, 2) and (1, −1). So
+by the above definition its slack matrix is the 3 × 2 nonnegative integer matrix
+SΓ =
+
+
+0
+1
+2
+0
+3
+0
+
+.
+6
+By Lemma 3.1, the slack matrix of a positive affine semigroup is unique up to permu-
+tation of rows and columns. In what follows, we explore the deeper connections between
+an affine semigroup and its slack matrix.
+The first important fact is that the slack matrix provides a canonical embedding of
+an affine semigroup in the integer lattice. To state this more precisely we introduce two
+affine semigroups that can be associated to any integer matrix. Let M ∈Zn×m. Denote by
+Γrow
+M
+⊆Zm and Γcol
+M ⊆Zm, the semigroups spanned by all nonnegative integer combinations
+of the rows and columns of M, respectively.
+Lemma 3.4. Let Γ be a positive affine semigroup, and let S ∈Zk×l
++
+be its slack matrix.
+Then Γ ∼= Γrow
+S
+and Γ∗∼= Γcol
+S , where the isomorphisms are given by sending each generator
+of Γ or Γ∗to the corresponding row or column, respectively, of the slack matrix.
+Proof. Let a1, ..., ak and b1, ..., bl be the minimal generating sets for Γ and Γ∗, respectively.
+Let φ : Γ →Zl be the map defined by
+φ
+X
+niai
+
+=
+X
+niSi
+for all n1, ..., nk ∈Z+, where Si is the i-th row of S. We want to show that φ is well-defined
+and injective.
+We begin by showing that this map is well-defined.
+If P niai = P miai, then for
+j = 1, ..., l we have
+hX
+(ni −mi)Si
+i
+j =
+X
+(ni −mi)Sij =
+X
+(ni −mi)⟨ai, bj⟩=

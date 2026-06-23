@@ -1,0 +1,262 @@
+1
+Beyond Functional Correctness: Exploring
+Hallucinations in LLM-Generated Code
+Fang Liu†, Yang Liu†, Lin Shi‡, Zhen Yang§, Li Zhang†*, Xiaoli Lian†, Zhongqi Li¶, Yuchi Ma¶
+†State Key Laboratory of Complex & Critical Software Environment (SKLCCSE)
+School of Computer Science and Engineering, Beihang University, Beijing, China
+‡School of Software, Beihang University, Beijing, China
+§School of Computer Science and Technology, Shandong University, Qingdao, China
+¶Huawei Cloud Computing Technologies Co., Ltd, China
+{fangliu, liuyang26, shilin}@buaa.edu.cn, zhenyang@sdu.edu.cn, {lily, lianxiaoli}@buaa.edu.cn
+{lizhongqi7, mayuchi1}@huawei.com
+Abstract—The rise of Large Language Models (LLMs) has
+significantly advanced various applications on software engineer-
+ing tasks, particularly in code generation. Despite the promising
+performance, LLMs are prone to generate hallucinations, which
+means LLMs might produce outputs that deviate from users’ in-
+tent, exhibit internal inconsistencies, or misaligned with the real-
+world knowledge, making the deployment of LLMs potentially
+risky in a wide range of applications. Existing work mainly fo-
+cuses on investigating the hallucination in the domain of Natural
+Language Generation (NLG), leaving a gap in comprehensively
+understanding the types, causes, and impacts of hallucinations in
+the context of code generation. To bridge the gap, we conducted
+a thematic analysis of the LLM-generated code to summarize
+and categorize the hallucinations, as well as their causes and
+impacts. Our study established a comprehensive taxonomy of
+code hallucinations, encompassing 3 primary categories and 12
+specific categories. Furthermore, we systematically analyzed the
+distribution of hallucinations, exploring variations among differ-
+ent LLMs and benchmarks. Moreover, we perform an in-depth
+analysis on the causes and impacts of various hallucinations,
+aiming to provide valuable insights into hallucination mitigation.
+Finally, to enhance the correctness and reliability of LLM-
+generated code in a lightweight manner, we explore training-
+free hallucination mitigation approaches by prompt enhancing
+techniques. We believe our findings will shed light on future
+research about code hallucination evaluation and mitigation,
+ultimately paving the way for building more effective and reliable
+code LLMs in the future. The replication package is available at
+https://github.com/Lorien1128/code hallucination.
+Index Terms—code generation, hallucination, large language
+models
+I. INTRODUCTION
+Code generation is the process of automatically generating
+source code based on provided specifications or requirements,
+which enables developers to save time by reducing manual
+coding efforts and allows them to focus on higher-level
+tasks and problem-solving. Moreover, it can aid in ensuring
+consistency and reducing the risk of human error during
+development [59, 67]. Automatic code generation has been
+a longstanding challenge in both software engineering and ar-
+tificial intelligence communities. The recent advancements in
+Large Language Models (LLMs) have significantly propelled
+* Corresponding author: Li Zhang
+this field forward [4, 55, 63]. For example, OpenAI’s Codex
+[4], released in 2021, has achieved a success rate of 28.8%
+in solving a set of 164 hand-written programming problems.
+Microsoft’s Copilot, a code generation tool powered by Codex,
+has captured the interest of over 1 million professional devel-
+opers [15]. Moreover, it has shown the potential to speed up
+coding tasks by up to 55% [30]. Subsequently, various code
+LLMs emerged in both academia and industry, such as Incoder
+[18], StarCoder [39], CodeGen [52, 53], Code Llama [63],
+DeepSeek-Coder [19], DeepSeek-R1 [20], ChatGPT [55], etc.
+These models have shown impressive performance in many
+code intelligence tasks, especially in code generation.
+Despite the remarkable success of LLMs, their predic-
+tive modeling nature makes them susceptible to generate
+results that are not correct and reliable [64, 88]. They are
+prone to generate hallucinations across various tasks [28].
+Hallucinations refers to the phenomenon that LLMs might
+produce nonsensical or unfaithful outputs to the provided
+source content [24, 28], which can poses a potential risk
+in deploying LLMs across various applications. Most exist-
+ing work mainly focuses on investigating the hallucination
+for natural language generation (NLG) tasks, for instance,
+generative question answering [36], abstractive summarization
+[49], dialogue generation [25], etc. However, there is still a
+lack of clarity regarding the specific types of content that
+LLMs tend to hallucinate during code generation, as well as
+their causes and potential consequences they may have. In
+the integration of the generated code into their development,
+developers may have the following concerns: What types of
+hallucinations does a code LLM typically produce? What are
+the possible causes and impact of different hallucinations?
+How are these hallucinations distributed across widely-used
+LLMs and popular benchmarks?
+We argue that such hallucinations also occur in the do-
+main of LLM-based code generation, primary manifesting in
+two main categories: knowledge hallucination and faithfulness
+hallucination, similar to the hallucination categories found in
+NLG domain [24]. Given the differences between natural lan-
+guage generation and code generation—where code possesses
+unambiguous semantics and must adhere to stricter constraints
+due to its structured nature and specific requirements—we
+arXiv:2404.00971v3  [cs.SE]  21 Jan 2026
+2
+define code hallucination as a phenomenon where an
+explicit semantic conflict between the generated code and
+established facts due to the failure of the LLM to re-
+tain, recall, or process information accurately from users’
+requirements, contextual code, or real-world knowledge.
+Consequently, compared to NLG, there may be variations
+in specific hallucination categories, their causes and impacts
+in code generation. The occurrence of code hallucinations
+may undermine the correctness, performance, maintenance,
+and even security of the developed software. As a result,
+the widespread adoption of Code LLMs for code recommen-
+dation has the inherent potential to compromise the overall
+quality and reliability of software. Hence, it is imperative to
+thoroughly investigate hallucinations in LLM-powered code
+generation. This will allow us to gain insights into the specific
+weaknesses that the LLM model may generate, helps us iden-
+tify code snippets or patterns that are likely to be incorrect or
+unreliable, providing valuable feedback for improving LLMs.
+To clarify terminology, a code (or a solution program) refers to
+a complete, functional program that solves the given problem.
+A code snippet refers to a self-contained segment of code that
+may constitute either a partial or complete solution program.
+In this paper, it generally denotes a part (or the entirety) of
+the LLM-generated code.
+Driven by the critical gaps in understanding hallucinations
+in LLM-generated code, we propose three research ques-
+tions focused on code hallucination. First, while prior studies
+have explored hallucinations in natural language generation,
+the unique characteristics of code (e.g., syntax constraints,
+functional correctness) necessitate a specialized investigation
+into the categories and distribution of code hallucinations.
+This motivates RQ1 (Distribution of Code Hallucinations),
+which systematically categorizes and quantifies hallucina-
+tions across diverse LLMs and benchmarks to establish a
+foundational understanding of their prevalence. Furthermore,
+through this research question, we aim to reveal whether
+certain hallucination categories are model-specific or task-
+dependent, providing a foundation for targeted improvements.
+Moreover, RQ2 (Hallucination Cause Analysis) is motivated
+by the practical imperative to identify factors contributing
+to code hallucinations. While prior work attributes NLG
+hallucinations to issues like training data biases or model
+overconfidence, code generation introduces unique triggers
+such as ambiguous/incomplete requirements, or knowledge
+gaps in programming APIs. Investigating these causes helps
+developers and researchers prioritize mitigation strategies.
+Finally, understanding the downstream consequences of code
+hallucinations is crucial for risk assessment and quality review
+when using LLMs for code generation. Unlike the focus in
+NLG hallucination, which concentrates on the impact of text
+consistency, RQ3 (Impact of Hallucination) evaluates the
+broader impacts of code hallucinations on software quality,
+including functional correctness, efficiency, and maintainabil-
+ity. These research questions form a holistic framework to
+characterize code hallucinations, uncover their root causes,
+assess their implications, and inform future solutions. The
+interplay between these questions ensures a comprehensive
+analysis: RQ1 identifies “what” code hallucinations exist, RQ2
+explains “why” they occur, and RQ3 evaluates “how” they
+affect real-world code quality.
+To answer these questions, we conducted a thematic analysis
+[9] of the LLM-generated code to summarize and catego-
+rize the hallucinations presented in it based on the unique
+characteristics of the code, and also analyze the causes and
+possible impacts of the code hallucinations. Specifically, we
+collected 3,120 code samples generated by different LLMs
+on two widely-used code generation benchmarks, and employ
+the open coding process to analyze these samples. Finally, we
+establish a comprehensive taxonomy of hallucinations, which
+comprises 3 primary categories (Requirement Conflicting hal-
+lucinations, Code Inconsistency hallucinations, and Knowledge
+hallucinations) and 12 specific types of hallucinations, and also
+summarized their causes and impacts. Then we conducted a
+comprehensive investigation and various statistical analyses of
+these hallucinations from diverse perspectives to gain a deeper
+understanding of their distributions, causes, and impacts, aim-
+ing to explore the prevailing challenges and opportunities in
+the field of code generation with LLMs. The analysis reveals
+that ❶code LLMs are frequently influenced by a diverse
+range of hallucinations, with Requirement Conflicting being
+the most prevalent hallucination across all studied LLMs and
+benchmarks. ❷Both the model’s inherent capabilities and the
+prompt quality contribute to the hallucination. ❸Regarding
+the impact, incorrect functionality is the most common and
+direct consequence of a majority of hallucinations, while
+code readability and efficiency are also typically affected.
+Therefore, it is imperative to develop effective techniques to
+mitigate hallucinations during code generation.
+Based on our findings, we performed a preliminary ex-
+periment to explore training-free hallucination mitigation ap-
+proaches by prompt enhancing techniques. The results suggest
+that ❹prompting the LLM to refine requirements or per-
+form chain-of-thought reasoning helps mitigate Requirement
+Conflicting hallucinations, while supplementing prompts with
+relevant domain knowledge reduces hallucinations stemming
+from knowledge conflicting hallucinations.
+In summary, this paper makes the following contributions:
+• Hallucination taxonomy of LLM-generated code: We
+conducted a comprehensive study to analyze the types of
+content LLMs may tend to hallucinate in code generation,
+and established a taxonomy of code hallucination categories.
+• Thorough analysis of code hallucinations: We systemati-
+cally analyzed the distribution of hallucinations across var-
+ious LLMs and code generation tasks, and also investigated
+the causes and impact of code hallucinations.
+• Hallucination mitigation exploration: We evaluated three
+widely-used prompt enhancing strategies to assess their ef-
+fectiveness in reducing LLM hallucinations, complementing
+this analysis with in-depth qualitative case studies to uncover
+the underlying mechanisms.
+• Implications for addressing code hallucinations: We de-
+liberated on the findings and implications associated with
+evaluating and mitigating hallucinations in LLM-generated
+code.
+3
+II. PRELIMINARY
+A. Terminology
+To facilitate our definition of hallucination in the context of
+code generation, we first clarify several key concepts.
+Definition 1: Requirement. The requirement refers to the
+natural language description about the programming task, as
+provided in the user’s input (prompt) to the LLM.
+Definition 2: Contextual Code. The contextual code encom-
+passes both the code included in the user’s input (prompt) and
+prior code generated by the LLM.
+Definition 3: Real-world Knowledge. The real-world knowl-
+edge refers to publicly available and verifiable information
+derived from human experience or natural activities.
+Definition 4: Established Fact. The established fact refers to
+objective, clear, verifiable, and context-bounded units of in-
+formation derived from: (1) requirements (e.g., user-specified
+input/output format constraints), (2) contextual code (e.g.,
+variable names, API usage given in the contextual code), and
+(3) real-world knowledge (e.g., mathematical laws).
+B. Definition of Code Hallucination
+When generating code, LLMs may involve contextual infor-
+mation from various sources, including user requirements, con-
+textual code, and real-world knowledge. For various reasons,
+the generated code may not always remain consistent with the
+contextual information and instead exhibit semantic conflicts.
+We argue that these semantic conflicts can be divided into two
+main types: (a) conflicts arising from failure to retain or recall
+contextual information, and (b) conflicts arising from errors in
+logical reasoning when converting retained information into
+actual code. In order to maintain consistency with the core
+meaning of hallucination in the NLG domain, we regard the
+first type of conflict as code hallucination. Given the black-box
+nature of LLMs, we typically can only analyze the final output
+(i.e., the generated code), making it often difficult to precisely
+attribute a conflict to one type or the other. Therefore, for the
+feasibility of practical classification, we further restrict code
+hallucination to “explicit semantic conflict” between generated
+code and established facts, where the conflict is immediate
+and obvious, not dependent on complex logical reasoning. In
+such cases, the probability that the conflict originates from the
+second type is small, allowing us to reasonably and clearly
+classify it as the first type.
+Based on the above analysis, we formally define code
+hallucination as a phenomenon where an explicit semantic
+conflict between the generated code and established facts
+due to the failure of the LLM to retain, recall, or
+process information accurately from users’ requirements,
+contextual code, or real-world knowledge. This discrepancy
+could arise due to flawed training data sources [34, 54],
+sub

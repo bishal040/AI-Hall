@@ -31,6 +31,11 @@ This index synthesizes the findings from 17 recent research papers surrounding t
 - **[🌍 Hallucination PREDICTION — The World Problem](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/hallucination_prediction_problem.md)**
 - **[💎 EVP — The Universal Hallucination Solution](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/evp_solution.md)**
 - **[🏗️ CPV — Constrained Property-Based Verification (Production-Grade)](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/cpv_solution.md)**
+- **[🧠 Why Humans Don't Hallucinate — The Cognitive Gap](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/human_cognition_vs_hallucination.md)**
+- **[💻 Mitigating Coding Hallucinations — How Claude Does It & What's Next](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/mitigating_coding_hallucinations.md)**
+- **[📚 Reading List — 15 Papers on Coding Hallucination (Papers 18-32)](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/reading_list_coding_hallucination.md)**
+- **[🔬 Deep Analysis — Papers 18-34 (10 Relevant + 5 Wrong Papers Identified)](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/papers_18_34_analysis.md)**
+- **[🎯 OPTIMAL THESIS SOLUTION — Evidence-Grounded CPV (Final)](file:///Users/istiakahmmedbishal/Desktop/Thesis/knowledge_base/optimal_solution_final.md)**
 
 ---
 

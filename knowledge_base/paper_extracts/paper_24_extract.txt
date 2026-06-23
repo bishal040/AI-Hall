@@ -1,0 +1,237 @@
+Type-Constrained Code Generation with Language Models
+NIELS MÜNDLER∗, ETH Zurich, Switzerland
+JINGXUAN HE∗, UC Berkeley, USA
+HAO WANG, UC Berkeley, USA
+KOUSHIK SEN, UC Berkeley, USA
+DAWN SONG, UC Berkeley, USA
+MARTIN VECHEV, ETH Zurich, Switzerland
+Large language models (LLMs) have achieved notable success in code generation. However, they still frequently
+produce uncompilable output because their next-token inference procedure does not model formal aspects
+of code. Although constrained decoding is a promising approach to alleviate this issue, it has only been
+applied to handle either domain-specific languages or syntactic features of general-purpose programming
+languages. However, LLMs frequently generate code with typing errors, which are beyond the domain of
+syntax and generally hard to adequately constrain. To address this challenge, we introduce a type-constrained
+decoding approach that leverages type systems to guide code generation. For this purpose, we develop novel
+prefix automata and a search over inhabitable types, forming a sound approach to enforce well-typedness
+on LLM-generated code. We formalize our approach on a foundational simply-typed language and extend it
+to TypeScript to demonstrate practicality. Our evaluation on the HumanEval and MBPP datasets shows that
+our approach reduces compilation errors by more than half and significantly increases functional correctness
+in code synthesis, translation, and repair tasks across LLMs of various sizes and model families, including
+state-of-the-art open-weight models with more than 30B parameters. The results demonstrate the generality
+and effectiveness of our approach in constraining LLM code generation with formal rules of type systems.
+CCS Concepts: • Theory of computation →Formal languages and automata theory; • Software and its
+engineering →General programming languages; • Computing methodologies →Machine learning.
+Additional Key Words and Phrases: Code Generation, Language Model, Type System, Program Synthesis,
+Program Translation, Program Repair, Constrained Decoding
+1
+Introduction
+Large language models (LLMs) are remarkably successful in diverse fields [12, 27, 49] and increas-
+ingly used in everyday coding tasks [25, 68]. They show promising capabilities at synthesizing
+code from natural language descriptions [37, 59], translating between programming languages [59],
+and repairing incorrect programs [44, 74]. Despite these achievements, LLM-generated code often
+contains compilation errors, logic flaws, or security vulnerabilities [20, 53, 55]. These issues arise
+because LLMs generate code by iteratively sampling the next token from a vocabulary of tokens –
+a probabilistic process that does not provide any formal guarantees.
+A promising technique to address this limitation is constrained decoding, which enforces the
+formal rules of programming languages during LLMs’ code generation process, rejecting invalid
+tokens and ensuring only valid tokens are considered as generation candidates. Previous studies
+have shown that constrained decoding improves adherence to program syntax [8, 41, 57, 66].
+∗Both authors co-lead this project.
+Authors’ Contact Information: Niels Mündler, niels.muendler@inf.ethz.ch, ETH Zurich, Switzerland; Jingxuan He, jingxuan.
+he@berkeley.edu, UC Berkeley, USA; Hao Wang, hwang628@berkeley.edu, UC Berkeley, USA; Koushik Sen, ksen@berkeley.
+edu, UC Berkeley, USA; Dawn Song, dawnsong@berkeley.edu, UC Berkeley, USA; Martin Vechev, martin.vechev@inf.ethz.ch,
+ETH Zurich, Switzerland.
+This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+arXiv:2504.09246v2  [cs.LG]  8 May 2025
+171:2
+Niels Mündler*, Jingxuan He*, Hao Wang, Koushik Sen, Dawn Song, Martin Vechev
+However, these improvements are limited, as syntax accounts for only a small part of overall
+program correctness. For instance, in our evaluation of state-of-the-art open-weight LLMs (§5),
+syntactic errors make up on average 6% of all compilation errors in generated TypeScript code.
+Key Challenge: Generating Well-Typed Code. Beyond program syntax, type systems detect
+and reject bugs at compile time [40, 43] and are therefore enforced in many popular programming
+languages [4, 10, 19]. We observe that LLMs struggle to generate well-typed code [20, 29, 63], as
+typing rules significantly complicate the generation of valid code [62]. In our evaluation of LLMs
+(§5), on average 94% of compilation errors result from failing type checks. This suggests a promising
+direction: guiding LLMs’ code generation process by incorporating the formal rules of type systems.
+However, implementing this approach is challenging because type systems can in general not be
+captured by context-free grammars [43], prohibiting the application of prior constrained decoding
+methods developed for program syntax [8, 66]. Furthermore, besides deriving and maintaining a
+type environment for completed expressions during generation (similar to classic type systems), we
+need to accurately assess and handle partial expressions. Specifically, for each currently generated
+partial expression, we must decide whether the partial expression can be completed to match
+a required type. Determining this would allow us to constrain the LLM to provably generate
+well-typed expressions upon termination, but involves solving the challenging problem of type
+inhabitation [30, 67] in the novel context of LLM-based code generation.
+This Work: Type-Constrained Decoding. In this work, we introduce type-constrained decod-
+ing1, addressing the challenge of generating well-typed code using LLMs . We develop a sound
+algorithm to determine if a partial program can be completed into a well-typed program. This
+algorithm is based on a novel non-deterministic automaton we construct. The automaton incre-
+mentally builds abstract syntax trees described by the partial program and annotates them with
+type-relevant context, e.g., declared identifiers and expression types. It leverages such information
+to maintain a prefix property, ensuring that parsing a program prefix only results in a non-empty
+set of states when it can be completed into a well-typed program. To guarantee the prefix property,
+we design a sound type search algorithm that determines whether a partial expression can inhabit a
+given type. We construct our automaton for a generic, simply-typed Turing-complete calculus [10].
+To demonstrate its practical effectiveness, we instantiate our approach on a non-trivial subset
+of TypeScript. We choose TypeScript for three key reasons: (i) it is currently one of the most
+actively used languages, e.g., in open-source projects on GitHub [26, 38]; (ii) as we show, state-
+of-the-art LLMs fail to reliably generate well-typed TypeScript code; (iii) its core type system is
+simple enough [10] to be suitable for developing the first prototype of our approach. We perform
+a comprehensive evaluation on TypeScript versions of the widely-used HumanEval and MBPP
+benchmarks [5, 13, 14], focusing on three common coding tasks: synthesis, translation, and repair.
+Our experimental results show that type-constrained decoding significantly enhances code gen-
+eration for LLMs of various sizes (2B-34B parameters). For synthesis and translation, it reduces
+compilation errors by more than half and increases functional correctness relatively by 3.5% to 5.5%.
+Additionally, it enhances functionally correct repair of non-compiling code relatively by 37% on
+average. We further investigate our approach in depth through a runtime analyses and case studies.
+We highlight that our type constraining approach is broadly applicable to any language deriv-
+able from the core calculus, any code generation task in these languages, and any LLM utilizing
+next-token generation. In §6, we envision how our approach can benefit other production-ready
+languages and closed-weight LLMs.
+1Our code implementation is publicly available at https://github.com/eth-sri/type-constrained-code-generation.
+Type-Constrained Code Generation with Language Models
+171:3
+Main Contributions.
+Our main contributions can be summarized as follows:
+• A prefix automaton and a type search algorithm to enable type constraining for LLM-based
+code generation, demonstrated on a generic, simply-typed core calculus (§3).
+• An instantiation and extension of our approach to the popular TypeScript language (§4).
+• An extensive evaluation across various LLMs and coding tasks, showing the significant benefit
+of our approach in reducing compilation errors and increasing functional correctness (§5).
+2
+Background and Overview
+In this section, we first provide relevant background on LLM-based code generation and constrained
+decoding. Then, we motivate our type constraining approach using an illustrative example and
+present a high-level overview of its construction.
+2.1
+Background on LLM-based Code Generation and Constrained Decoding
+Algorithm 1 Vanilla LLM-based code generation
+(without the blue highlights) vs. constrained de-
+coding (with the blue highlights)
+Input: LLM, prompt 𝑥, completion engine 𝐶𝐸𝐿
+for language 𝐿
+Output: Program 𝑠such that 𝑠∈𝐿
+1: initialize 𝑠
+2: while true do
+3:
+𝒗≔LLM(𝑥◦𝑠)
+4:
+while true do
+5:
+𝑡∼𝒗
+6:
+if 𝐶𝐸𝐿(𝑠◦𝑡) then break
+7:
+elif 𝑡= 𝐸𝑂𝑆and 𝑠∈𝐿then break
+8:
+else 𝒗[𝑡] ≔0; normalize 𝒗
+9:
+if 𝑡= 𝐸𝑂𝑆then break
+10:
+𝑠≔𝑠◦𝑡
+11: return 𝑠
+LLM-based Code Generation.
+LLMs gener-
+ate code incrementally by sampling one token
+at a time in an iterative manner, as depicted
+in Algorithm 1 (without the blue highlights).
+A user prompt 𝑥specifies a code generation
+task for a trained LLM. At Line 1, the output
+program 𝑠is initialized to an empty string or
+a program prefix provided in 𝑥, e.g., a function
+signature. At the beginning of each generation
+iteration (Line 3), the LLM takes as input a con-
+catenation 𝑥◦𝑠of the prompt 𝑥and the current
+partial program 𝑠. It then predicts a probability
+distribution 𝒗over a fixed, finite set of tokens,
+the vocabulary, where each token may be a sin-
+gle Unicode character or a string of multiple
+characters. All common singleton characters
+are included in LLMs’ vocabulary, ensuring that
+any standard program can be produced by con-
+catenating tokens [60]. Next, based on distri-
+bution 𝒗, a token 𝑡is sampled (Line 5) and appended to the program 𝑠(Line 10). This process is
+repeated until we encounter the special token 𝐸𝑂𝑆which signifies the end of the sequence (Line 9).
+LLMs learn to predict adequate probability distributions from extensive training on natural and
+programming languages [12, 59, 73]. These distributions implicitly encode language rules, allowing
+LLMs to successfully solve code generation tasks [13, 28, 59]. However, LLMs may fail to infer
+complex rules [9, 21, 72], derive incomplete rules for less common languages [13, 51], and, due to
+the probabilistic nature of its generation procedure, not consistently follow formal language rules.
+Constrained Decoding.
+The aforementioned shortcoming of LLMs can be mitigated by employ-
+ing constrained decoding, which analyzes the intermediate model outputs 𝑠during the generation
+process and enforces that only valid tokens are incorporated. Specifically, constrained decoding
+leverages a completion engine 𝐶𝐸𝐿, specific to a language 𝐿. Computing 𝐶𝐸𝐿(𝑠) returns whether
+partial program 𝑠can be completed to a well-formed program in 𝐿, meaning whether there exists a
+(possibly empty) string 𝑠′ such that 𝑠◦𝑠′ ∈𝐿. Equivalently, 𝐶𝐸𝐿(𝑠) determines whether 𝑠belongs
+to the prefix language 𝐿𝑝of 𝐿, i.e., whether 𝑠∈𝐿𝑝. 𝐿𝑝is formally defined as follows:
+Definition 1. For a given language 𝐿, its prefix language is 𝐿𝑝≔{𝑠| ∃𝑠′ : 𝑠◦𝑠′ ∈𝐿}.
+171:4
+Niels Mündler*, Jingxuan He*, Hao Wang, Koushik Sen, Dawn Song, Martin Vechev
+function is_int(text: string): boolean {
+const num = Number(text);
+return !isNaN(num) &&
+parseInt(num <completion>
+<completion>
+Vanilla Syntax Types
+Description
+(1)
+;
+accept
+reject
+reject
+Syntactically invalid
+(2)
+ber
+accept
+accept
+reject
+Undeclared identifier
+(3)
+()
+accept
+accept
+reject
+Disallowed operator
+(4)
+, 10)
+accept
+accept
+reject Invalid argument type
+(5)
+.toString()
+accept
+accept accept
+Well-formed option
+Figure 1. Left is a partial TypeScript program derived from instance #113 of the MBPP benchmark [5], awaiting
+completion. Right are five completion options: (1)-(4) are invalid and (5) is well-formed. Our type-constrained
+decoding is the only approach capable of correctly rejecting invalid completions and accepting the valid one.
+As illustrated in blue highlights of Algorithm 1, constrained decoding differs from vanilla LLM-
+based code generation by adding an additional sample-and-check loop at Line 4 around the token
+sampling process at Line 5. A sampled token 𝑡is considered further only if 𝑠◦𝑡can be completed
+to a well-formed program (Line 6) or 𝑡is 𝐸𝑂𝑆and 𝑠is already well-formed in 𝐿(Line 7). Otherwise,
+the probability of 𝑡is set to zero at Line 8, and the sample-and-check loop repeats. Note that a token
+𝑡satisfying either Line 6 or Line 7 always exists, because 𝑠is in 𝐿𝑝and LLMs’ vocabulary contains
+all common characters. Therefore, the number of iterations of the loop at Line 4 is bounded by the
+fixed LLM vocabulary size. In practice, only few iterations are needed (§5.3) and do not require
+additional LLM inference, ensuring a reasonable runtime overhead compared to vanilla decoding.
+The token-level guarantees extend inductively to guarantee the final program’s validity with
+respect to 𝐿. At Line 1, we start with a valid prefix in 𝐿𝑝, i.e., either an empty string or a valid prefix
+provided in the user prompt. The check at Line 6 ensures that all intermediate outputs 𝑠are prefixes
+in 𝐿𝑝. Additionally, Line 7 and Line 9 ensure that the return statement in Line 11 is reached only
+if 𝑠∈𝐿. As an additional benefit, by steering previously ill-formed generations into well-formed
+ones, constrained decoding also increases the likelihood of generating functionally correct code.
+Note that commonly used grammar and type checkers can not be used as a completion engine
+for constrained decoding. They judge whether a program string 𝑠is well-formed according to the
+language 𝐿, i.e., whether 𝑠∈𝐿. When 𝑠is not a complete program in 𝐿, but a valid prefix in 𝐿𝑝,
+they return a different output than 𝐶𝐸𝐿(𝑠), which is not suitable for use in Algorithm 1.
+2.2
+Overview of Our Type Constraining Approach
+Inadequacy of Syntax-Only Constraining. To apply the constrained decoding algorithm
+described in §2, one needs to choose a language 𝐿and implement the completion engine 𝐶𝐸𝐿.
+Recent work has explored defining 𝐿as the set of syntactically valid programs, thus leveraging
+the syntactic rules of programming languages for constrained decoding [8, 66, 71]. However, the
+benefits of this approach are limited, because syntax accounts for only a small portion of overall
+program correctness. For instance, across our evaluations (§5), only 3.5% of the functional errors
+and 6% of the compilation errors in LLM-generated code are due to syntactic

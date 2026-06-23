@@ -1,0 +1,302 @@
+HIPPO-MAT: Decentralized Task Allocation Using GraphSAGE and
+Multi-Agent Deep Reinforcement Learning
+Lavanya Ratnabala 1,*, Robinroy Peter 2,*, Aleksey Fedoseev 1, and Dzmitry Tsetserukou 1
+Abstract— This paper tackles decentralized continuous task
+allocation in heterogeneous multi-agent systems. We present
+a novel framework HIPPO-MAT that integrates graph neural
+networks (GNN) employing a GraphSAGE architecture to com-
+pute independent embeddings on each agent with an Indepen-
+dent Proximal Policy Optimization (IPPO) approach for multi-
+agent deep reinforcement learning. In our system, unmanned
+aerial vehicles (UAVs) and unmanned ground vehicles (UGVs)
+share aggregated observation data via communication chan-
+nels while independently processing these inputs to generate
+enriched state embeddings. This design enables dynamic, cost-
+optimal, conflict-aware task allocation in a 3D grid environment
+without the need for centralized coordination. A modified A*
+path planner is incorporated for efficient routing and collision
+avoidance. Simulation experiments demonstrate scalability with
+up to 30 agents and preliminary real-world validation on JetBot
+ROS AI Robots, each running its model on a Jetson Nano and
+communicating through an ESP-NOW protocol using ESP32-
+S3, which confirms the practical viability of the approach that
+incorporates simultaneous localization and mapping (SLAM).
+Experimental results revealed that our method achieves a high
+92.5% conflict-free success rate, with only a 16.49% perfor-
+mance gap compared to the centralized Hungarian method,
+while outperforming the heuristic decentralized baseline based
+on greedy approach. Additionally, the framework exhibits
+scalability with up to 30 agents with allocation processing
+of 0.32 simulation step time and robustness in responding to
+dynamically generated tasks.
+Keywords — Multi-agent systems, Task Allocation, Deep Rein-
+forcement Learning, GraphSAGE, IPPO
+I. INTRODUCTION
+Multi-agent systems offer significant advantages in terms
+of scalability, distributed operation, and parallel task ex-
+ecution in modern automated logistics systems. However,
+efficiently assigning continuously emerging tasks to the most
+suitable agents remains a formidable challenge, particularly
+in dynamic 3D environments where simultaneous decision-
+making is required and conflicts can arise when multiple
+agents select the same task.
+Traditional task allocation approaches are often divided
+into centralized and decentralized methods. Centralized tech-
+niques, such as the Hungarian algorithm [1], can produce
+globally optimal assignments but require continuous high-
+bandwidth communication and are prone to bottlenecks and
+single points of failure. Decentralized methods, on the other
+*The authors contributed equally to this work.
+1The authors are with the Intelligent Space Robotics Laboratory,
+Skolkovo Institute of Science and Technology, Bolshoy Boulevard 30, bld.
+1, 121205, Moscow, Russia.
+{lavanya.ratnabala, aleksey.fedoseev,
+d.tsetserukou}@skoltech.ru
+2The author is with NeuroFleets (PVT) LTD, Jaffna, Sri Lanka.
+robinroy.peter@neurofleets.com
+Fig. 1: Jetbot ROS AI Robots equipped with Jetson Nano
+for individual policy loading and ESP32-S3 for inter-agent
+communication.
+hand, typically operate in 2D and assume sequential or one-
+by-one task processing. This sequential assumption, however,
+is impractical in real-world scenarios where tasks must
+be processed concurrently. Moreover, existing decentralized
+approaches often yield suboptimal allocations, leading to
+conflicts or redundant task assignments and increased overall
+costs. and most of them doesn’t touch on conflict manage-
+ment.
+We present a novel framework aimed at improving real-
+time task allocation. Our approach enables continuous task
+allocation in a three-dimensional environment through con-
+current, decentralized decision-making. We integrate a graph
+neural network (GNN) based on a GraphSAGE architecture
+[2] to compute independent state embeddings on each agent.
+These embeddings capture critical inter-agent and agent-to-
+task interactions, allowing each robot to evaluate the shared
+task pool concurrently and resolve conflicts by ensuring
+unique task assignments. By coupling these GNN-enhanced
+representations with an Independent Proximal Policy Op-
+timization (IPPO), our method optimizes task allocation
+decisions to minimize total cost (e.g., travel distance and
+time) while ensuring efficient routing via a modified A* path
+planner.
+In summary, our main contributions are:
+• Concurrent Task Allocation in 3D: We develop a frame-
+work that enables multiple agents to concurrently access
+and allocate continuously emerging tasks in a dynamic
+three-dimensional environment, overcoming the limi-
+arXiv:2503.07662v1  [cs.MA]  8 Mar 2025
+tations of simultanious robots processing the tasks in
+Decentralised MATA.
+• GNN-Enhanced Independent Policy Learning: Novel
+approach By integrating GraphSAGE-based indepen-
+dent state embeddings with an IPPO framework, our
+approach captures rich inter-agent interactions, enabling
+informed, near optimal conflict-aware task assignment
+decisions.
+• Coupled
+Navigation
+and
+Real-World
+Validation:
+Our framework tightly couples task allocation with
+reservation-based
+A*
+path
+planner
+to
+optimize
+routing and collision avoidance, and we validate
+its performance through extensive simulations and
+preliminary real-world experiments using JetBot ROS
+AI Robot with SLAM-based navigation.
+II. RELATED WORKS
+Optimization techniques, e.g., the linear sum assignment
+problem (LSAP) and the Hungarian algorithm, have been
+widely applied in multi-agent task allocation [3]. While
+these methods provide optimal solutions, they often rely on
+centralized computation, rendering them unsuitable for large-
+scale real-time applications. Ismail et al. [4] proposed a novel
+decentralized-based Hungarian method to solve this problem.
+Another decentralized version of the Hungarian method is
+proposed by Xia et al. [5] to solve task allocation for
+underwater vehicles. These methods extend the Hungarian
+approach to decentralized settings by ensuring task allocation
+remains optimal as long as agent networks remain connected.
+Kong et al. [6] proposed a new optimization strategy that
+combines the improved particle swarm optimization and the
+greedy IPSO-G algorithm. Moreover, two different stochastic
+approaches, the Genetic Algorithm (GA) and the Ant-Colony
+Optimization (ACO) algorithm, were introduced by [7] to
+solve the multi-robot task allocation problem. Peter et al.
+[8] introduced a swarm intelligence-based task allocation
+method utilizing decentralized decision-making and subgoal-
+based path formation.
+Market-based strategies, particularly auction-based meth-
+ods, have been widely explored for decentralized task allo-
+cation. Zhong et al. [9] proposed an extended auction-based
+driver-passenger matching system for ride-sharing applica-
+tions. Liu et al. [10] extended auction-based methods to
+multi-UAV systems, incorporating Dubins path-based flight
+cost estimation to refine task allocations. While auction-
+based strategies provide high adaptability, their efficiency
+heavily depends on accurate bid valuation models. An al-
+ternative hybrid approach is introduced in the Harmony
+Drone Task Allocation (DTA) method [11], which integrates
+a consensus-based auction mechanism with a gossip-based
+consensus strategy. The Harmony DTA optimizes multi-
+drone task allocation under complex time constraints by
+balancing task urgency with resource availability while min-
+imizing communication load.
+The integration of DRL into MATA has led to promis-
+ing advancements, particularly through MARL frameworks.
+Agrawal et al. [12] introduced an attention-inspired DRL
+method for warehouse-based task allocation that optimizes
+decision-making efficiency and scalability. Similarly, Dai
+et al. [13] propose a decentralized RL approach for het-
+erogeneous multi-robot task allocation, where robots with
+diverse skills form coalitions to complete tasks, minimizing
+the overall mission completion time. They use attention
+mechanisms to reason about task dependencies and agent
+skills and introduce a constrained flash forward mechanism
+to improve training efficiency.
+Moreover, recent studies explore Multi-Agent Proximal
+Policy Optimization (MAPPO) to enhance collaborative
+decision-making and mitigate non-stationary challenges in
+multi-agent environments [14]. Lowe et al. [15] use Q-
+learning to do cooperative and competitive tasks. However,
+Christian et al. show that IPPO, where each agent learns
+its own policy using only local observations, can achieve
+performance on par with or even better than state-of-the-
+art centralized training methods (e.g., QMIX, MAPPO) on
+several challenging maps from the StarCraft Multi-Agent
+Challenge (SMAC) [16].
+Recent advances in graph-based learning methods have
+demonstrated substantial potential for improving decentral-
+ized task allocation. GNNs enable robots to model and pro-
+cess inter-agent relationships, allowing task allocations to be
+computed based on local graph structures rather than central-
+ized control. Goarin et al. [3] proposed DGNN-GA, a decen-
+tralized GNN-based goal assignment method that optimizes
+communication efficiency in multi-robot planning for a fixed
+number of tasks. Heterogeneous multi-agent systems pose
+additional complexities due to differences in robot capabili-
+ties, sensor modalities, and mobility constraints. The GATAR
+framework [17] introduced a graph-based task allocation
+framework for multi-robot target localization, specifically
+designed for heterogeneous robot systems. Furthermore, Blu-
+menkamp et al. [18] develop a real-world framework for
+deploying decentralized GNN-based policies in multi-robot
+systems, facilitating seamless sim-to-real transfers. Bettini et
+al. propose Heterogeneous Graph Neural Network Proximal
+Policy Optimization (HetGPPO), a framework for training
+heterogeneous MARL policies using Graph Neural Networks
+(GNNs) for inter-agent communication. By enabling agents
+to learn distinct behaviors while maintaining fully decentral-
+ized training in partially observable environments, HetGPPO
+highlights the effectiveness of GNNs in decentralized MARL
+[19]. Ratnabala et al. [20] recently proposed a GNN-based
+DRL framework for heterogeneous robot swarms. The sug-
+gested MAGNNET approach allowed an efficient compro-
+mise between optimization methods and locally optimized
+greedy approaches; however, the centralized critic model
+suggests a challenge in further scalability of the system.
+Despite significant progress, current approaches exhibit
+several key limitations. Many continuous task allocation
+methods assume that tasks are processed sequentially, which
+is impractical in scenarios where multiple agents must simul-
+taneously access, evaluate, and assign tasks. Additionally,
+most existing studies [12] assume that only one robot is
+available at a time and skip the conflict resolution part,
+failing to capture the complex dynamics of three-dimensional
+spaces essential for realistic navigation and task allocation.
+Moreover, task allocation is often decoupled from navigation,
+even though efficient systems require integrated routing and
+collision avoidance. Finally, while some methods address
+heterogeneous teams, they typically rely on centralized infor-
+mation or static task models, limiting scalability in dynamic,
+large-scale deployments. In contrast, our work proposes a
+decentralized framework for continuous task allocation in
+3D environments by integrating a GraphSAGE-based GNN
+with an Independent PPO (IPPO) framework. This approach
+enables multiple agents to concurrently access and optimize
+a shared task pool, resolve conflicts, and minimize overall
+cost while coupling task allocation with a modified A* path
+planner for efficient navigation and collision avoidance.
+III. MULTI-AGENT TASK ALLOCATION APPROACH
+A. Problem Formulation
+We consider a system of N agents (or robots), de-
+noted by {a1, a2, . . . , aN}, operating in a continuous three-
+dimensional domain Ω
+⊂
+R3. A set of M
+tasks,
+{T1, T2, . . . , TM}, is generated over time. Each task Tj is
+characterized by its location lj ∈Ωand a status sj(t) ∈
+{Waiting, Assigned} at time t. Once a task is allocated to an
+agent, it is replaced by a new task.
+Each agent ai is described by its position pi(t) ∈Ωand
+its operational status (e.g., idle, accept, assign, or complete).
+The travel cost for agent ai to complete task Tj at time t is
+defined as:
+cij(t) = dij(t)
+vi
+,
+(1)
+where dij(t) is the shortest-path distance (e.g., computed
+via A*) from pi(t) to lj, and vi is the velocity of ai. The
+cost values are clipped to the interval [0, cmax] and then
+normalized to [−1, 1] for improved training stability.
+Rather than solving for a centralized assignment using
+binary variables xij ∈{0, 1}, each agent selects an action
+from a discrete set:
+Ai = {0, 1, . . . , M},
+(2)
+where action “0” denotes absence of the task request, action
+j ∈{1, . . . , M} denotes the request of the task Tj. When
+multiple agents request the same task, the task is allocated to
+the agent with the smallest normalized cost, while the other
+agents incur a penalty.
+B. Graph Neural Network for Independent Agent Embedding
+We model the multi-agent system as a graph, G = (V, E)
+where each node vi ∈V corresponds to an agent ai. The
+graph is fully connected, meaning that for every pair of
+distinct agents ai and, aj there exists an edge (vi, vj) ∈E.
+This connectivity allows each agent to aggregate information
+from all other agents in the system.
+The raw observation for each agent ai is represented by a
+vector xi ∈R1+2M. This vector consists of three elements:
+the agent’s status (a scalar normalized to −1 when idle
+and +1 when assigned), a set of M normalized cost values
+corresponding to the travel costs to each available task, and
+a set of M binary indicators that denote the status of each
+task (with +1 for a waiting task and −1 for an inactive task).
+Thus, xi captures the local state of the agent with respect to
+task allocation.
+The edge set E is defined as:
+E = {(vi, vj) | ∀i, j ∈{1, . . . , N}, i ̸= j},
+which means that each agent is directly connected to every
+other agent. No explicit edge features are used; rather, the
+connectivity enables the diffusion of information across the
+network.
+To obtain a compact and informative representation of
+each agent’s state, we apply a GraphSAGE layer. The em-
+bedding for agent ai is computed as:
+zi = tanh
+ 
+W xi +
+X
+j̸=i
+W′ xj
+!
+,
+where W and W′ are the learnable weight matrices. W xi
+is the self-transformation of the agent’s own features, while
+the summation P
+j̸=i W′ xj aggregates the features from
+all other agents. The tanh activation function is applied
+to normalize the output to the range (−1, 1). The final
+embedding zi ∈R6 is then used as the input to the agent’s
+policy network.
+This graph-based formulation, with its fully connected
+structure and GraphSAGE aggregation, ena

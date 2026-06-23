@@ -1,0 +1,339 @@
+Latent Conditional Diffusion-based Data Augmentation for
+Continuous-Time Dynamic Graph Model
+Yuxing Tian
+tianyxx@gmail.com
+International Digital Economy
+Academy, IDEA Research
+Shenzhen, China
+Yiyan Qi
+qiyiyan@idea.edu.cn
+International Digital Economy
+Academy, IDEA Research
+Shenzhen, China
+Aiwen Jiang
+jiangaiwen@jxnu.edu.cn
+Jiangxi Normal University
+Nanchang, China
+Qi Huang
+huangqi@jxnu.edu.cn
+Jiangxi Normal University
+Nanchang, China
+Jian Guo‡
+guojian@idea.edu.cn
+International Digital Economy
+Academy, IDEA Research
+Shenzhen, China
+ABSTRACT
+Continuous-Time Dynamic Graph (CTDG) precisely models evolv-
+ing real-world relationships, drawing heightened interest in dy-
+namic graph learning across academia and industry. However, ex-
+isting CTDG models encounter challenges stemming from noise and
+limited historical data. Graph Data Augmentation (GDA) emerges
+as a critical solution, yet current approaches primarily focus on
+static graphs and struggle to effectively address the dynamics inher-
+ent in CTDGs. Moreover, these methods often demand substantial
+domain expertise for parameter tuning and lack theoretical guaran-
+tees for augmentation efficacy. To address these issues, we propose
+Conda, a novel latent diffusion-based GDA method tailored for CT-
+DGs. Conda features a sandwich-like architecture, incorporating a
+Variational Auto-Encoder (VAE) and a conditional diffusion model,
+aimed at generating enhanced historical neighbor embeddings for
+target nodes. Unlike conventional diffusion models trained on en-
+tire graphs via pre-training, Conda requires historical neighbor
+sequence embeddings of target nodes for training, thus facilitating
+more targeted augmentation. We integrate Conda into the CTDG
+model and adopt an alternating training strategy to optimize perfor-
+mance. Extensive experimentation across six widely used real-world
+datasets showcases the consistent performance improvement of
+our approach, particularly in scenarios with limited historical data.
+CCS CONCEPTS
+• Theory of computation →Dynamic graph algorithms; •
+Information systems →Social networks.
+‡ Corresponding Author.
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+KDD ’24, August 25–29, 2024, Barcelona, Spain.
+© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-0490-1/24/08
+https://doi.org/10.1145/3637528.3671863
+KEYWORDS
+Dynamic graph, data augmentation, diffusion model
+ACM Reference Format:
+Yuxing Tian, Yiyan Qi, Aiwen Jiang, Qi Huang, and Jian Guo‡. 2024. Latent
+Conditional Diffusion-based Data Augmentation for Continuous-Time Dy-
+namic Graph Model. In Proceedings of the 30th ACM SIGKDD Conference
+on Knowledge Discovery and Data Mining (KDD ’24), August 25–29, 2024,
+Barcelona, Spain. ACM, NewYork, NY, USA, 12 pages. https://doi.org/10.
+1145/3637528.3671863
+1
+INTRODUCTION
+Continuous-Time Dynamic Graphs (CTDGs), with every edge (event)
+having a timestamp to denote its occurrence time, are prevalent
+in real-world applications such as social networks [1, 11], physical
+systems [18] and e-commerce [46]. Recently, CTDG models [2, 16,
+17, 23, 24, 26, 31, 37, 48] have gained increasing attention due to
+their significant representation capacity by directly learning the
+representation of the continuously occurring events in CTDGs. De-
+spite the rapid advancements in CTDG models, they encounter two
+primary challenges. Firstly, the "observed" CTDG often falls short
+of accurately representing the true underlying process it intends
+to model, mainly due to various factors such as measurement in-
+accuracies, thresholding errors, or human mistakes [22]. Secondly,
+most CTDG methods typically rely on extensive historical data for
+effective training [26]. However, in many applications, obtaining
+such data is impractical, particularly in scenarios with a cold start.
+For instance, a nascent trading platform may only possess a few
+days’ worth of user-asset interactions, rendering existing CTDG
+models trained on such limited data inadequate and resulting in
+sub-optimal performance.
+Graph Data Augmentation (GDA) has emerged as a promising
+solution, with existing methods falling into two main categories [7]:
+structure-oriented and feature-oriented methods. Structure-oriented
+methods, such as [15, 28, 42], typically involve adjusting graph con-
+nectivity by adding or removing edges or nodes. On the other hand,
+feature-oriented methods, exemplified by works from [12, 14, 15,
+21, 32], directly modify or create raw features of nodes or edges in
+graphs.
+arXiv:2407.08500v2  [cs.LG]  20 Jul 2024
+KDD ’24, August 25–29, 2024, Barcelona, Spain.
+Yuxing Tian, Aiwen Jiang, Qi Huang, Jian Guo, & Yiyan Qi
+However, most existing GDA methods focus on static graphs and
+it is challenging to directly apply on CTDG. (1) Existing structure-
+oriented GDA methods heavily rely on domain knowledge, necessi-
+tating the selection of diverse augmentation strategy combinations
+tailored to specific graph datasets, as highlighted in [45]. Further-
+more, structure-oriented GDA methods present inherent challenges
+in calibrating the extent of data augmentation, potentially leading
+to either over-augmentation or under-augmentation [3]. This is-
+sue arises from input data processed by mapping-agnostic deep
+neural networks, which generate features without tailored calibra-
+tion. (2) Existing feature-oriented GDA methods concentrate on
+transforming node/edge features and have demonstrated significant
+optimization improvements with appropriate feature augmenta-
+tions. However, they cannot handle graphs lacking node features or
+even edge features. (3) Although Wang et al. [36] propose MeTA for
+CTDG, this method is tailored for CTDG models [29, 31] with mem-
+ory modules, limiting its compatibility with other state-of-the-art
+models such as DyGFormer [44] and GraphMixer [5].
+To address these above challenges, we introduce a novel latent
+conditional diffusion-based data augmentation method for CTDG
+models, named Conda. Conda adopts a sandwich-like architecture,
+comprising a Variational Auto-Encoder (VAE) and a conditional
+diffusion model. This design aims to create new historical neighbor
+embeddings derived from existing neighbor sequences, enhancing
+subsequent training of the CTDG model. Unlike traditional diffusion
+models trained via pre-training on the entire graphs, Conda neces-
+sitates historical neighbor sequence embeddings of target nodes for
+training. Consequently, we integrate Conda into the CTDG model
+and implement an alternating training strategy. Our contributions
+can be summarized as follows:
+• We present Conda, an innovative data augmentation technique
+aimed at enhancing the CTDG model. This method leverages a
+latent conditional diffusion model to generate historical neighbor
+embeddings for the target node during the training phase.
+• Rather than directly manipulating the raw graph structure, Conda
+operates within the latent space, where it is more likely to en-
+counter authentic samples.
+• We extensively evaluate our method on six widely used real-
+world datasets and compare it against seven baselines. Our re-
+sults demonstrate that Conda enhances the performance of link
+prediction tasks on these baselines by up to 5%. Notably, this
+improvement is achieved without the need for domain-specific
+knowledge.
+2
+PRELIMINARIES
+2.1
+Continuous-Time Dynamic Graph
+A CTDG 𝐺can be represented as a chronological sequence of inter-
+actions between specific node pairs:𝐺= {(𝑢0, 𝑣0,𝑡0), . . . , (𝑢𝑛, 𝑣𝑛,𝑡𝑛)},
+where 𝑡𝑖denotes the timestamp and the timestamps are ordered
+as (0 ≤𝑡0 ≤𝑡1 ≤... ≤𝑡𝑛). 𝑢𝑖, 𝑣𝑖∈𝑉denote the node IDs of the
+𝑖−𝑡ℎinteraction at timestamp 𝑡𝑖, 𝑉is the entire node set. Each
+node 𝑣∈𝑉is associated with node feature 𝑣𝑢, and each interaction
+(𝑢, 𝑗,𝑡) has edge feature 𝑒𝑡
+𝑢,𝑣∈𝑅𝑑𝑒, where 𝑑𝑣and 𝑑𝑒denote the
+dimensions of the node and link feature respectively.
+2.2
+Diffusion Model
+The diffusion model encompasses both forward and reverse pro-
+cesses.
+Forward process. In general, given an input data point 𝒙0 drawn
+from the distribution 𝑞(𝒙0), the forward process involves gradually
+introducing Gaussian noise to 𝒙0, generating a sequence of increas-
+ingly noisy variables 𝒙1, 𝒙2, . . . , 𝒙𝑁in a Markov chain. The final
+noisy output, 𝒙𝑁, follows a Gaussian distribution N (0, 𝑰) and car-
+ries no discernible information about the original data point. Specif-
+ically, the transition from one point to the next is determined by
+a conditional probability 𝑞(𝒙𝑛|𝒙𝑛−1) = N (𝒙𝑛;
+√︁
+1 −𝛽𝑛𝒙𝑛−1, 𝛽𝑛𝑰),
+where 𝛽𝑛∈(0, 1) controls the scale of noise added at step 𝑛.
+Reverse process. The reverse process reverses the effects of the
+forward process by learning to eliminate the added noise and tries
+to gradually reconstruct the original data 𝑥0 via sampling from 𝑥𝑁
+by learning a neural network 𝑓𝜃.
+Inference. Once trained, the diffusion model can produce new data
+by sampling a point from the final distribution 𝒙𝑁∼N (0, 𝑰) and
+then iteratively denoising it using the aforementioned model 𝒙𝑁↦→
+𝒙𝑁−1 ↦→· · · ↦→𝒙0 to obtain a sample from the data distribution.
+3
+METHODOLOGY
+Existing structure-oriented GDA methods like MeTA augment the
+CTDGs by modifying the initial interactions through edge addi-
+tion/deletion and time perturbation. However, these methods in-
+troduce coarse-grained augmentations and substantially alter the
+original transition patterns within CTDGs. Conversely, simply in-
+troducing noise to either the raw or hidden feature space often lacks
+theoretical bound. In this section, we introduce a novel fine-grained
+GDA model based on a conditional diffusion model and establish
+robust theoretical guarantees.
+3.1
+CTDG model
+As mentioned above, the paradigm of the CTDG model 𝜉can be
+divided into two parts: the encoder module and the backbone mod-
+ule. Mathematically, given an interaction (𝑢, 𝑣,𝑡) and historical
+interactions before timestamp 𝑡, the computation flow unfolds as
+follows:
+𝒔𝑡
+𝑢= 𝑒𝑛𝑐({𝑣𝑤𝑙∥𝑒𝑡𝑙
+(𝑢,𝑤𝑙) ∥𝑡𝑙}),𝑤𝑙∈N<𝑡(𝑢)
+(1)
+where 𝒔𝑡
+𝑢∈𝑅𝐿×𝐷denotes the historical neighbor embedding se-
+quence, 𝐷represents the embedding dimension. N<𝑡(𝑢) denotes
+the sampled set of neighbors that interacted with node 𝑢before
+timestamps 𝑡, 𝑤𝑙∈N<𝑡(𝑢) is the 𝑙-th neighbor, and ∥denotes
+the concatenation operation. 𝑒𝑛𝑐(·) represents the general encoder
+module of CTDG model.
+𝒉𝑡
+𝑢= 𝑏𝑎𝑐𝑘𝑏𝑜𝑛𝑒(𝒔𝑡
+𝑢)
+(2)
+𝒉𝑡
+𝑢∈𝑅𝐷denotes the representation of node 𝑢at timestamp 𝑡.
+𝑏𝑎𝑐𝑘𝑏𝑜𝑛𝑒(·) represents the backbone of CTDG model.
+3.2
+Conda
+Due to the extensive resource requirement of the diffusion process,
+to reduce the costs, we first utilize a VAE encoder to conduct di-
+mension compression and then conduct diffusion processes in the
+latent space.
+Latent Conditional Diffusion-based Data Augmentation for Continuous-Time Dynamic Graph Model
+KDD ’24, August 25–29, 2024, Barcelona, Spain.
+Figure 1: The Alternating Training Process of Conda and the CTDG model. While the Conda module is in the training phase,
+the other modules are frozen. Conversely, when the Conda module is frozen, other modules are in the training phase
+VAE Encoder. Given the historical neighbor embedding se-
+quence 𝒔of any node 1, computed by the CTDG encoder module,
+we use a variational encoder parameterized by 𝜙to compress 𝒔
+to a low-dimensional vector 𝒛∈𝑅𝐿×𝑑, where 𝑑<< 𝐷, the VAE
+encoder 𝜙predicts 𝝁𝜙and 𝜎2
+𝜙𝑰as the mean and covariance of the
+variational distribution 𝑞𝜙(𝒛|𝒔) = N (𝒛; 𝝁𝜙(𝒔), 𝜎2
+𝜙(𝒔)𝑰).
+Forward Process with Partial Noising. It is worth noting that,
+different from the conventional diffusion model that corrupts the
+whole variable without distinction, we conduct partial noising in
+order to control the magnitude of data augmentation and prepare
+for the reverse process with conditional denoising. Specifically,
+given the low-dimensional vector 𝒛= [𝑧𝑤1,𝑧𝑤2, ...,𝑧𝑤𝐿], we can set
+𝒙0 = 𝒛as the initial state. Then we divide 𝒙0 into two part: diffused
+part and conditional part, 𝒙𝑑𝑖𝑓𝑓
+0
+∈𝑅𝑑𝑖𝑓𝑓×𝑑and 𝒙𝑐𝑜𝑛𝑑
+0
+∈𝑅𝑐𝑜𝑛𝑑×𝑑,
+where 𝑑𝑖𝑓𝑓+ 𝑐𝑜𝑛𝑑= 𝐿and 𝒙0 = 𝒙𝑑𝑖𝑓𝑓
+0
+||𝒙𝑐𝑜𝑛𝑑𝑎
+0
+. In the forward
+process, we only add noise on 𝒙𝑑𝑖𝑓𝑓
+0
+. Then the forward process is
+parameterized by
+𝑞(𝒙𝑑𝑖𝑓𝑓
+𝑛
+|𝒙𝑑𝑖𝑓𝑓
+𝑛−1 ) = N (𝒙𝑑𝑖𝑓𝑓
+𝑛
+;
+√︁
+1 −𝛽𝑛𝒙𝑑𝑖𝑓𝑓
+𝑛−1 , 𝛽𝑛𝑰),
+(3)
+where 𝛽𝑛∈(0, 1) controls the Gaussian noise scales added at each
+step 𝑛. Since the transition kernel is Gaussian, the value at any step
+𝑛can be sampled directly from 𝒙0 in practice. Let 𝛼𝑛= 1 −𝛽𝑛and
+¯𝛼𝑛=
+𝑛
+Ö
+𝑛′=1
+𝛼′
+𝑛, then we can write:
+𝑞(𝒙𝑑𝑖𝑓𝑓
+𝑛
+|𝒙𝑑𝑖𝑓𝑓
+0
+) = N (𝒙𝑑𝑖𝑓𝑓
+𝑛
+; √¯𝛼𝑛𝒙𝑑𝑖𝑓𝑓
+0
+, (1 −¯𝛼𝑛)𝑰).
+(4)
+where we can reparameterize 𝒙𝑛= √¯𝛼𝑛𝒙0 + √1 −¯𝛼𝑛𝝐with 𝝐∼
+N (0, 𝑰). To regulate the added noises in 𝒙1:𝑁, follow [35], we ultilize
+the linear noise schedule for 1 −¯𝛼𝑛:
+1 −¯𝛼𝑛= 𝑘·
+
+𝛼min + 𝑛−1
+𝑁−1 (𝛼max −𝛼min)
+
+,
+𝑛∈{1, . . . , 𝑁} (5)
+1For brevity, we omit the subscript node 𝑢and superscript timestamp 𝑡in 𝒔for 𝒔𝑡
+𝑢
+unless necessary to avoid ambiguity.
+where a hyper-parameter 𝑘∈[0, 1] controls the noise scales, and
+two hyper-parameters 𝛼min < 𝛼max ∈(0, 1) indicating the upper
+and lower bounds of the added noises.
+Reverse Process with Conditional Denoising. The reverse
+process is used to reconstruct the original 𝒙0 by denoising 𝒙𝑁. With
+the partial nosing strategy adopted in the forward process, we can
+naturally employ the part without noise as the conditional input
+when denoising.
+Starting from 𝒙𝑁, the reverse process is parameterized by the
+denoising transition step:
+𝑝𝜃(𝒙𝑛−1|𝒙𝑛) = N (𝒙𝑛−1; 𝝁𝜃(𝒙𝑛,𝑛), 𝝈𝜃(𝒙𝑛,𝑛))
+(6)
+where 𝝁𝜃(𝒙𝑛,𝑛) and 𝝈𝜃(𝒙𝑛,𝑛) are parameterization of the pre-
+dicted mean and standard deviation outputted by any neural net-
+works 𝑓𝜃. Then the whole reverse process can be written as follows:
+𝑝𝜃(𝑥𝑁:0) = 𝑝(𝑥𝑁)
+𝑛
+Ö
+𝑛=1
+𝑝𝜃(𝒙𝑛−1|𝒙𝑛)
+(7)
+The reconstructed output is denoted as ˆ𝒙0.
+VAE Decoder. To keep the notations consistent, we set ˆ𝒛= ˆ𝒙0,
+ˆ𝒛is then fed into the VAE decoder parameterized by 𝜓to predict 𝒔
+via 𝑝𝜓(𝒔| ˆ𝒙0).
+3.3
+Optimization and Alternating Training
+In this section, we first present the optimization objective for the
+Conda and the CTDG model, respectively. Then we introduce the
+training and inference process of CTDG model with conda.
+Although our ultimate goal is to learn a CTDG model 𝜉, but
+we also have to learn the parameters of the VAE encoder 𝑞𝜙(𝒛|𝒔),
+the conditional diffusion model log𝑝𝜃(𝒙0) and the VAE decoder
+𝑝𝜓(𝒔| ˆ𝒙0) for providing positive augmentation to the CTDG model.
+CTDG model. For training the CTDG model 𝜉, the Loss func-
+tion L𝑐𝑡𝑑𝑔depends on the downstream task. For example, if the
+downstream task is link prediction, then the loss function is binary
+cross-entropy.
+KDD ’24, August 25–29, 

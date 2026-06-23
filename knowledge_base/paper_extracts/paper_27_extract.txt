@@ -1,0 +1,213 @@
+1 
+ 
+Quantum light sources with configurable lifetime leveraging 
+parity-time symmetry 
+Nuo Chen,1,9 Wen-Xiu Li,2,3,9 Yun-Ru Fan,2,3,* Hang-Hang Li,1 Hong Zeng,2,3 Wu-Qiang Chi,1  
+Heng Zhou,4 Hao Li,5 Li-Xing You,5 Guang-Can Guo,2,3,6,7 Qiang Zhou,2,3,6,7, † Jing Xu,1,8,‡ 
+and Xin-Liang Zhang1,8,§ 
+1School of Optical and Electronic Information & Wuhan National Laboratory for Optoelectronics, 
+Huazhong University of Science and Technology, Wuhan 430074, China 
+2Institute of Fundamental and Frontier Sciences, University of Electronic Science and Technology of China, 
+Chengdu 611731, China 
+3Key Laboratory of Quantum Physics and Photonic Quantum Information, Ministry of Education, 
+University of Electronic Science and Technology of China, Chengdu 611731, China 
+4Key Lab of Optical Fiber Sensing and Communication Networks, School of Information and Communication 
+Engineering, University of Electronic Science and Technology of China, Chengdu 611731, China 
+5National Key Laboratory of Materials for Integrated Circuits, 
+Shanghai Institute of Microsystem and Information Technology, Chinese Academy of Sciences, Shanghai 200050, China 
+6Center for Quantum Internet, Tianfu Jiangxi Laboratory, Chengdu 641419, China 
+7CAS Key Laboratory of Quantum Information, University of Science and Technology of China, Hefei 230026, China 
+8Optics Valley Laboratory, Hubei 430074, China 
+9These authors contributed equally: Nuo Chen, Wen-Xiu Li 
+*Corresponding author: Yun-Ru Fan (yunrufan@uestc.edu.cn) 
+†Corresponding author: Qiang Zhou (zhouqiang@uestc.edu.cn) 
+‡Corresponding author: Jing Xu (jing_xu@hust.edu.cn) 
+§Corresponding author: Xin-Liang Zhang (xlzhang@hust.edu.cn) 
+Abstract Quantum light sources with configurable photon lifetimes are essential for large-scale 
+quantum circuits, enabling applications in programmable quantum computing, various quantum 
+key distribution protocols, and quantum tomography techniques. However, the fundamental 
+trade-off between efficiency and photon lifetime imposes significant challenges on the design 
+of high-performance large configurable lifetime quantum light sources. Here, we report on such 
+chip-scale quantum light sources by harnessing the unique feature of parity-time (PT) symmetry. 
+The core design centers on employing PT-symmetric coupling between two microresonators of 
+distinct circumferences, enabling broad-range and selective tuning of intracavity photon density 
+of states. By controlling the alignment between resonators, we achieved a 38-fold photon 
+lifetime tuning range (4 ~ 158 ps), with the shortest lifetimes near the exceptional points of the 
+PT-symmetric systems. The device generates energy-time entangled photon pairs with 
+87.1 ± 1.1% interference visibility and a heralded second-order autocorrelation of 𝑔ℎ
+(2)(0) = 
+0.069 ± 0.001. Our work highlights the potential of PT symmetry for advanced quantum 
+applications, including high-speed communication and programmable quantum computing, 
+quantum coherent tomography, and beyond. 
+ 
+2 
+ 
+Introduction 
+On-chip generation of diverse optical quantum states has been widely demonstrated, highlighting its 
+substantial potential for advancing integrated quantum information processing applications [1–8]. As 
+the field advances, the scalable and configurable generation and manipulation of quantum states across 
+various degrees of freedom become increasingly essential [5,6,9–19]. Photon lifetime is one of the 
+critical degrees of freedom in optical quantum states, predominantly determined by the bandgap of a 
+two-level system or the cavity quality factor (Q-factor) of a resonator-based photon emitter [20]. For 
+example, photons with long lifetimes, on the order of several nanoseconds, typically exhibit relatively 
+narrow linewidths, ranging from a few MHz to several hundred MHz. They are indispensable for 
+aligning with the atomic transition linewidths to enable effective photon-atom interactions, crucial for 
+quantum repeater-based long-distance quantum secure communications [21–22]. On the other hand, 
+to maximize the rate of quantum communication systems, the lifetime of single-photons τ must be 
+compressed, since the communication bandwidth is proportional to 2/τ, as governed by Fourier 
+reciprocity [13]. Short-lived photons are also required in quantum optical coherent tomography [24,25]. 
+Furthermore, the ability to configure photon lifetime is vital for a variety of applications. Dynamically 
+tunable photon lifetime schemes have been utilized as quantum random number generators [9]. Sources 
+with configurable photon lifetime are highly promising for frequency-encoded qubits, a key 
+component in scalable quantum information processing technologies [26]. 
+On the integrated photonics platform, research has shown that the control of the photon lifetime 
+can be realized by integrated modulation modules to shape spectra of single-photon pulses [9,12–16]. 
+However, implementing modulation after photon generation complicates the quantum system structure 
+and can introduce extra losses. In recent years, optical microresonators utilizing spontaneous nonlinear 
+effects have been extensively demonstrated as quantum light sources [1–3,27–34]. It has been shown 
+that different photon lifetimes can be achieved by setting distinct coupling gaps between the resonator 
+and the bus waveguide [20]. Nevertheless, modifying the photon lifetime becomes challenging once 
+the quantum light source devices are fabricated. More importantly, the fundamental trade-off between 
+efficiency and bandwidth imposes significant constraints on the design of high-performance 
+configurable photon lifetime quantum light sources. That is, to generate photons with a short lifetime, 
+3 
+ 
+the duration of light-matter interaction must be reduced (related to an increase of the cavity bandwidth), 
+which in return severely deteriorates the generation efficiency [35,36]. Therefore, it is crucial to find 
+other photon lifetime adjustment schemes that do not sacrifice the efficiency, or the photon generation 
+rate (PGR). 
+Recent advances in parity-time (PT)-symmetric systems have attracted substantial attention due 
+to their easy implementation yet profound implications in photonics [37–41]. The non-Hermitian 
+property of PT-symmetric systems, especially at the exceptional point (EP) where the eigenvalues and 
+corresponding eigenvectors coalesce, gives rise to a range of unconventional light-matter interaction 
+phenomena [42,43]. These properties enable wide applications in areas such as lasing [44], enhanced 
+sensing [45,46], coherent absorption [47], optical frequency combs [48,49], and beyond. In addition, 
+we have shown in a recent work that by leveraging PT symmetry and breaking the uniformity of 
+resonance linewidth of the coupled system, the trade-off between efficiency and bandwidth has been 
+relieved for classical applications such as nonlinear optical signal processing [50]. This indicated that 
+the trade-off between short photon lifetime and large PGR may be relieved via a similar linewidth-
+manipulation method. Indeed, integrated resonance-manipulated devices have been studied for several 
+quantum applications, such as spectral-uncorrelated photon-pairs generation [51,52] or high-
+coincidence efficiency photon-pairs sources [53]. Nevertheless, achieving direct and large-range 
+control of cavity photon lifetime remains elusive. 
+In this work, we design an effective photon lifetime-configurable quantum light source by 
+leveraging a dual-ring coupled PT-symmetric system. PT symmetry introduces an extra degree of 
+freedom through unbalanced losses to control the decay rates of microresonators, making it naturally 
+suitable for adjusting the photon lifetime. The maximum loss contrast near and away from the EP 
+enables orders of magnitude control of the photon lifetime. Meanwhile, the PGR has maintained a 
+moderately high-value thanks to the undegraded pump enhancement via the linewidth manipulation 
+technique. Experimentally, we demonstrate a 38-fold variation in photon lifetime, from 4.1 to 158.4 ps. 
+The generation of energy-time entangled photon pairs exhibits a typical raw two-photon interference 
+visibility of 87.1 ± 1.1%. A typical heralded second-order autocorrelation 𝑔ℎ
+(2)(0) of 0.069 ± 0.001 
+is also obtained. 
+4 
+ 
+Results 
+System design and principle of operation 
+We demonstrate the configurable photon lifetime quantum light source using spontaneous four wave-
+mixing (SFWM) in a dual-ring coupled PT-symmetric system, as sketched in Fig. 1a. The main ring 
+(red) with a radius 𝑅1 is coupled to the auxiliary ring (blue) with a radius 𝑅2. The intrinsic decay 
+rates of the main and auxiliary rings are 𝛾1 and 𝛾2, respectively, and the coupling strength between 
+the two rings is 𝜅. The auxiliary ring is coupled to the bus waveguide with the coupling decay rate 𝛾c, 
+resulting in a total decay rate of the auxiliary ring as 𝛾1 + 𝛾c. When 𝛾c ≫𝛾1,2, the decay rates of the 
+two coupled rings become severely unbalanced, and a passive PT-symmetric system is thus formed 
+[48]. Given that the radius ratio is set to 𝑅1 = 2𝑅2, the free spectral range (FSR) of the two rings 
+(denoted as 𝐹𝑆𝑅1 and 𝐹𝑆𝑅2, respectively) differs by a factor of 2, as depicted by the intracavity 
+photon density of state (DOS) in Fig. 1b. A thermal tuning module is fabricated on the auxiliary ring 
+to adjust the detuning between the two rings. When a voltage is applied to the thermal tuning electrode, 
+the resonance of the auxiliary ring gradually aligns with that of the main ring, consequently reducing 
+the Q-factors of the corresponding resonances of the main ring (see Fig. 1c(ii) and 1d). The resonances 
+influenced by this adjustment are designated as the signal and idler resonances, whereas the central 
+resonance, which remains unchanged due to the FSR difference of the two rings, functions as the pump 
+resonance (see Fig. 1d(iii)). The purpose of this design is twofold. On one hand, the reduced Q-factors 
+of the signal and idler resonances result in a shorter photon lifetime. On the other hand, the unaffected 
+high-Q pump resonance ensures high SFWM efficiency in the quantum light source, thereby 
+maintaining a high PGR. Physically, this phenomenon arises because spontaneous four-wave mixing 
+(SFWM) primarily occurs in the main ring, where the pump light is predominantly confined [50], while 
+the generated photons are emitted through the bus waveguide. The photon lifetime of the emitted 
+photons is largely determined by the coupling decay introduced by the auxiliary ring. 
+Without loss of generality, we consider in the following the evolution of signal resonance since 
+the signal and idler resonances act similarly. According to temporal coupled-mode theory (TCMT), 
+the non-Hermitian Hamiltonian of the system reads [40,50] 
+5 
+ 
+𝐻̂ = [
+𝜔1 −𝑖
+𝛾1
+2
+𝜅
+𝜅
+𝜔2 −𝑖
+𝛾2+𝛾c
+2
+], 
+(1) 
+where 𝜔1, 𝜔2 are the resonant frequencies of the main ring and the auxiliary ring, respectively. 
+δ𝜔= 𝜔2 −𝜔1 is the detuning between the two rings. Solving the complex eigenfrequencies of 
+Hamiltonian, the eigenfrequencies of the PT-symmetric system can be expressed as [40,50] 
+𝜔± = [
+1
+2 (𝜔1 + δ𝜔) −
+𝑖
+4 (𝛾2 + 𝛾𝑐+ 𝛾1)] ±
+1
+4 √16𝜅2 −(𝛾2 + 𝛾𝑐−𝛾1)2. 
+(2) 
+Discussion simplifies when the intrinsic losses of the two rings are identical, i.e., 𝛾1 = 𝛾2, which can 
+be approximated in our design and fabricated devices. Under the condition of δ𝜔= 0 (i.e., the two 
+rings are aligned), the EP occurs at the degeneracy point of complex eigenfrequencies, i.e., 𝜅= 𝛾c 4
+⁄  
+(for details, see Supplementary information S1: System analysis methods). 
+Consider a typical situation that commonly occurs in integrated coupled ring systems when the 
+coupling between two rings is strong and ring-wave coupling loss is small, i.e., 𝜅> 𝛾1,2 ≫𝛾c [9]. 
+The system exhibits a typical mode splitting that corresponds to 𝜅 at δ𝜔= 0, as mapped in Fig. 1c(i). 
+In contrast, the losses of the coupling decay 𝛾c in our design is much larger than the intrinsic losses 
+𝛾1,2. When the coupling coefficient is set to be 𝜅≈𝛾c 4
+⁄ , the system operates near the EP, as mapped 
+in Fig. 1c(ii). A merged single resonance with a significant low-Q is formed at δ𝜔= 0, which is 
+naturally suitable for generating short-lived photons.  
+The photon lifetime adjustment process is achieved by changing the detuning between two rings 
+using a thermal tuning module, as illustrated in Fig. 1d. Initially, the auxiliary ring with resonant 
+frequency 𝜔2 is misaligned with the main ring 𝜔1. The signal and idler resonances can be regarded 
+as resonances from a single ring under critical coupling with a linewidth of ∆𝜔= 2𝛾1 when detuning 
+is large, e.g., δ𝜔≈𝐹𝑆𝑅1/2 [50]. Therefore, the signal and idler resonances are high-Q resonances 
+in this case, as shown in Fig. 1d(i), and the photon lifetime is calculated by [20,54] 
+ 
+6 
+ 
+𝜏high−Q =
+1
+∆𝜔=
+1
+2𝛾1. 
+(3) 
+As the voltage applied to the thermal tuning electrode of the auxiliary ring gradually increases, the 
+resonance of the auxiliary ring approaches that of the main ring (Fig. 1d(ii)) until they are completely 
+aligned (δ𝜔= 0), as shown in Fig. 1d(iii). In case (iii), the signal and idler resonances operate near 
+the EP, with a linewidth of 2Im(𝜔+) ≈𝛾c, according to Eq. (2). At this point, the photon lifetime is 
+given by 
+𝜏low−Q =
+1
+𝛾c. 
+(4) 
+It can be derived from Eqs. (3) and (4) that the maximum achievable contrast of the photon lifetime is 
+𝛾c/2𝛾1. Thus, increasing the coupling decay rate of the auxiliary and the bus-waveguide or reducing 
+the intrinsic loss of the main ring can enhance the contrast ratio in the tunability of the photon lifetime. 
+Device characterization 
+We then design the device on the low-loss integrated silicon nitride-on-insulator (SNOI) platform to 
+experimentally demonstrate a configurable photon lifetime quantum light source. The chip is 
+fabricated by LIGENTEC (Switzerland) using a standard thick silicon nitride waveguide process. The 
+waveguide dimensions are 1000 nm × 800 nm (width × height), supporting only the fundamental mode. 
+The radius of the main ring is designed as 𝑅1 = 228 μm (with an FSR close to 100 GHz to match 
+dense wavelength division multiplexer (DWDM) channels), and the radius of the auxiliary ring is 
+𝑅2 = 114 μm. The transmission spectra from 1534 nm to 1540 nm of the system under different 
+voltages, i.e., 0 V and 6.6 V, are plotted in Fig. 2a and Fig. 2b, respectively (for details, see 
+Supplementary information S2: Spectra characterizations). Under a 0 V bias, the two rings are 
+misaligned, and the overall transmission spectrum exhibits a series of near critical-coupled high-Q 
+resonances from the main ring (𝐹𝑆𝑅1 = 0.78 nm). Between each two high-Q resonances, there are 
+auxiliary ring resonances (yellow lines) with a relatively low extinction ratio (𝐹𝑆𝑅2= 1.56 nm) due to 
+the auxiliary ring being in a state of over-coupling with the bus waveguide. Under a bias of 6.6 V, the 
+7 
+ 
+resonances of the main

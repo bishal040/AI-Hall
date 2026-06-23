@@ -1,0 +1,224 @@
+Primordial Black Holes
+Bernard Carr,a and Florian K¨uhnelb
+aQueen Mary University of London, School of Physics & Astronomy, Mile End Road, London E1 4NS, UK
+bMax Planck Institute for Physics, Physics, Boltzmannstr. 8, 85748 Garching, Germany
+© 20xx Elsevier Ltd. All rights reserved.
+Chapter Article tagline: update of previous edition,, reprint..
+Key Points
+•
+Primordial black holes may have formed in the early Universe due to the compression of the big bang, their most likely source being
+inflationary density fluctuations or some form of cosmological phase transition.
+•
+Numerous constraints from astrophysics and particle physics imply that the fraction of the early Universe collapsing must be tiny but
+the implied fine-tuning problem can be resolved in some scenarios.
+•
+Such black holes would not grow much and could be small enough for quantum radiation to be important, those below 1015 g having
+evaporated with important consequences for the early Universe.
+•
+Those larger than 1015 g could provide the dark matter, explain some of the recently observed gravitational wave events and act as seeds
+for supermassive black holes and early cosmic structures.
+•
+An attractive scenario which combines all of these features suggests that the black holes have a solar mass and formed at the QCD
+epoch, although it is also possible that the dark matter comprises black holes of planetary or asteroidal mass.
+•
+Studies of primordial black holes potentially probe four areas of physics: the early Universe, gravitational collapse, high-energy physics
+and quantum gravity.
+Nomenclature
+AGN
+Active Galactic Nuclei
+BBN
+Big Bang Nucleosynthesis
+CDM
+Cold Dark Matter
+CMB
+Cosmic Microwave Background
+EGRET
+Energetic Gamma Ray Experiment Telescope
+EROS
+Exp´erience pour la Recherche d’Objets Sombres
+GW
+Gravitational Wave
+HSC
+Hyper Suprime-Camera
+IMBH
+Intermediate Mass Black Hole
+IPTA
+International Pulsar Timing Array
+JWST
+James Webb Space Telescope
+KAGRA
+Kamioka Gravitational-Wave Detector
+LIGO
+Laser Interferometer Gravitational-Wave Observatory
+LVK
+LIGO-Virgo KARGRA
+LSST
+Large Synoptic Survey Telescope
+MACHO
+Massive Compact Halo Object
+OGLE
+Optical Gravitational Lensing Experiment
+PBH
+Primordial Black Hole
+QCD
+Quantum Chromo Dynamics
+SMBH
+SuperMassive Black Hole
+WIMP
+Weakly Interacting Massive Particle
+UFDG
+Ultra-Faint Dwarf Galaxy
+Abstract
+In this chapter we first describe the early history of primordial black hole (PBH) research. We then discuss their possible formation
+mechanisms, including critical collapse from inflationary fluctuations and various types of phase transition. We next describe the
+numerous constraints on the number density of PBHs from various quantum and astrophysical processes. This was the main focus
+of research until recently but there is currently a shift of emphasis to the search for evidence for PBHs. We end by discussing this
+evidence, with particular emphasis on their role as dark matter candidates, sources of gravitational waves and seeds for supermassive
+black holes and early cosmic structures.
+Keywords: Black holes; Compact objects; Cosmology; Dark matter; Early universe; Gravitational lensing; Gravitational wave astron-
+omy; Hawking radiation; Primordial black holes
+1
+arXiv:2502.15279v1  [astro-ph.CO]  21 Feb 2025
+2
+Primordial Black Holes
+Introduction
+According to general relativity, when a region of mass M is compressed within its Schwarzschild radius, RS ≡2GM/c2, it forms a black
+hole. While these objects could theoretically exist across many mass scales, natural astrophysical processes can only create them above
+a solar mass. Black holes several times heavier than the Sun can form at the endpoint of stellar evolution, with our Galaxy’s disc alone
+containing hundreds of millions of them. Stars larger than a few hundred solar masses, above the pair-instability mass gap, can potentially
+form Intermediate Mass Black Holes (IMBHs) through direct collapse. This is the category that might include the Universe’s earliest stars.
+Supermassive Black Holes (SMBHs), with masses from 106 M⊙to 1010 M⊙, reside in galactic nuclei and would power quasars. The one at
+the center of the Milky Way has a mass of 4 × 106 M⊙.
+Another type of black hole could have formed during the Universe’s earliest moments and these are called “primordial”. Comparing the
+cosmological density at a time t after the Big Bang with the density needed for matter to collapse within its Schwarzschild radius, implies
+that primordial black holes (PBHs) would have of order the cosmic horizon mass, M ∼c3 t/G, at formation. Their possible masses therefore
+span a huge range: from the Planck mass (MPl ∼10−5 g) if created at the Planck time (10−43 s), to a solar mass (1 M⊙) if formed during the
+quantum chromodynamics (QCD) epoch (10−5 s) and 105 M⊙if generated at t ∼1 s. So PBHs could exist below the traditional solar-mass
+threshold. They could also be small enough for Hawking radiation to be important, those lighter than Earth being hotter than the cosmic
+microwave background (CMB) and those below 1015 g evaporating within the current age of the Universe.
+The wide mass range of black holes and their crucial role in linking macrophysics and microphysics is summarised in Figure 1. The
+edge of the orange circle can be regarded as a sort of “clock” in which the scale changes by a factor of 10 for each minute, from the Planck
+scale at the top left to the scale of the observable Universe at the top right. The top itself corresponds to the Big Bang because at the
+cosmological horizon distance one is peering back to an epoch when the Universe was very small, so the very large meets the very small
+there. The various types of black holes are labelled by their mass and positioned according to their Schwarzschild radius. On the right are
+the astrophysical black holes, with the well-established stellar and supermassive ones corresponding to the segments between 5 and 50 M⊙
+and between 106 and 1010 M⊙, respectively. On the left — and possibly extending to the right — are the more speculative PBHs.
+The vertical line between the bottom (planetary-mass black holes) and the top (Planck-mass black holes) provides a convenient division
+between the microphysical and macrophysical domains. Quantum emission is suppressed by accretion of the CMB to the right of the bottom
+point, so this might be regarded as the transition to classical black holes. The effects of extra dimensions could be important at the top,
+especially if they are compactified on a scale much larger than the Planck length. In this context, there is a sense in which the whole Universe
+might be a PBH; this is because in brane cosmology (in which one extra dimension is extended) the Universe can be regarded as emerging
+from a five-dimensional black hole. Although we cannot be certain that PBHs formed at all, research into their consequences potentially
+probes four distinct areas of physics: (1) the early Universe (M < 1015 g); (2) gravitational collapse (M > 1015 g); (3) high-energy physics
+(M ∼1015 g); (4) quantum gravity (M ∼10−5 g).
+Early Work on PBH Formation, Accretion and Evaporation
+The possibility of PBH formation emerges from two key density expressions: the cosmic density following the Big Bang, ρ ∼1/(Gt2), and
+the critical density needed for an object to collapse within its Schwarzschild radius, ρ ∼c6/(G3M2). This implies an initial PBH mass:
+M ∼c3t
+G ∼1015 
+t
+10−23 s
+
+g ,
+(1)
+this being of order the mass contained within the cosmic horizon at time t. This relation was used in a seminal paper by Hawking (1971),
+in which he proposed that Planck-mass PBHs would carry electric charge, enabling them to capture electrons or protons to create atom-like
+structures. He suggested these “atoms” might be detectable through tracks in bubble chambers and that they might also be concentrated in
+stellar cores. Later, it was realised that such small black holes would lose their charge through quantum effects but the notion that PBHs
+might be swallowed by stars has recently become topical.
+Interestingly, an earlier analysis by Zel’dovich and Novikov (1967) had led them to conclude that such objects could not exist because
+they would undergo runaway accretion. Their skepticism stemmed from a Bondi accretion calculation which suggested that PBHs formed
+with the horizon mass (as expected) would grow at the same rate as the cosmic horizon, reaching 1017 M⊙by the end of the radiation-
+dominated era. Since the existence of such huge black holes is precluded, this suggested that PBHs never formed. However, this argument
+neglected the cosmic expansion, which is important for PBHs with the horizon size and would inhibit accretion. Later Carr and Hawking
+(1974) showed that there is no solution in general relativity in which a black hole formed from local collapse can grow as fast as the cosmic
+horizon. Furthermore, the black hole would soon become much smaller than the horizon, at which point the Bondi formula should apply
+and implies that it should not grow much at all.
+The removal of the concerns raised by Zeldovich–Novikov reinvigorated PBH research and led to Hawking’s revolutionary discovery
+that black holes emit thermal radiation with a temperature:
+TBH =
+ℏc3
+8πGMkB
+∼10−7
+ M
+M⊙
+!−1
+K .
+(2)
+Primordial Black Holes
+3
+Fig. 1 This indicates the mass and size of various types of black holes, with the division between the micro and macro domains being
+indicated by the vertical line. QSO stands for Quasi-Stellar Object, MW for Milky Way, IMBH for Intermediate Mass Black Hole, SLAB
+for Stupendously Large Black Hole. Stellar black holes (SBHs) and supermassive black holes (SMBHs) occupy only the small slivers
+shown in white, whereas PBHs occupy the much wider range shown in orange.
+This results in their complete evaporation over a time:
+τ(M) ≈5120 π G2 M3
+ℏc4
+∼1067
+ M
+M⊙
+!3
+yr .
+(3)
+PBHs of initial mass M∗∼1015 g, formed at 10−23 s with the size of a proton, would be completing their evaporation in the present era,
+while less massive ones would have vanished earlier. However, PBHs heavier than Earth (1027 g) would be cooler than the CMB, causing
+them to grow through accretion rather than shrink through evaporation. Hawking’s discovery has not yet been confirmed experimentally and
+there remain major conceptual puzzles associated with the process. Nevertheless, it is generally recognised as one of the key developments
+in 20th-century physics because it beautifully unifies general relativity, quantum mechanics and thermodynamics. The fact that Hawking
+was only led to this discovery through contemplating the properties of PBHs illustrates that it has been useful to study them even if they
+never actually formed.
+This period also saw the emergence of more detailed models of PBH formation. The high density of the early Universe does not guarantee
+PBH formation because one also needs density fluctuations, so that overdense regions can eventually stop expanding with the background.
+However, only regions larger than the Jeans length at maximum expansion could collapse against the pressure. This is approximately √w
+times the horizon scale for an equation of state is p = w ρ. For PBHs forming from Gaussian density fluctuations with root-mean-square
+amplitude ϵ(M) at horizon crossing, this implies that the fraction of the Universe collapsing into PBHs of mass M should be (Carr, 1975)
+β(M) ∼ϵ(M) exp
+"
+−
+w2
+2 ϵ(M)2
+#
+.
+(4)
+One expects w = 1/3 during the radiation-dominated era and it was initially expected that ϵ(M) should be scale-invariant. In this case, β
+should also be scale-invariant and the PBH mass function should fall as M−5/2. However, as discussed later, this does not apply for the
+fluctuations expected in the inflationary scenario since these are not exactly scale-invariant.
+On cosmological scales the amplitude of the fluctuations at horizon crossing is around 10−5, so the exponential dependence in Eq. (4)
+implies that the collapse fraction is tiny unless ϵ is much enhanced on small scales. Observations also require this since, if the current
+density parameter of PBHs which form at redshift z is ΩPBH in units of the critical density, the initial collapse fraction must have been
+β = ΩPBH
+ΩR
+(1 + z)−1 ∼10−6 ΩPBH
+ t
+s
+1/2
+∼10−18 ΩPBH
+ 
+M
+1015 g
+!1/2
+,
+(5)
+where ΩR ≈10−4 is the current density parameter of radiation and we have used Eq. (1) at the last step. The (1 + z) factor arises because
+the radiation density scales as (1 + z)4, whereas the PBH density scales as (1 + z)3. So β must be tiny even if PBHs provide all of the dark
+4
+Primordial Black Holes
+matter. This is a potential criticism of the PBH dark matter proposal, since it requires fine-tuning of β and even greater fine-tuning of ϵ.
+There is also the puzzling feature that the PBH and baryon densities are very close if PBHs provide the dark matter, although (as discussed
+later) there is one scenario in which this arises naturally.
+The constraints on β(M) are particularly strong on the scales for which evaporation is important. Since PBHs with a mass of 1015 g
+would be producing photons with energy of order 100 MeV at the present epoch, the observational limit on the γ-ray background intensity at
+100 MeV immediately implies that their density could not exceed 10−8 times the critical density (Page and Hawking, 1976). This means that
+there is little chance of detecting black hole explosions at the present epoch, which would have confirmed the existence of both PBHs and
+Hawking radiation. Nevertheless, the evaporation of PBHs smaller than 1015 g could still have many interesting cosmological consequences,
+each associated with a different type of emitted particle, and it also implied interesting constraints on the collapse fraction β(M).
+The evaporation constraints were first brought together by Novikov et al. (1979). The strongest one is the γ-ray limit associated with
+the 1015 g PBHs. Others are associated with the generation of entropy and modifications to the cosmological production of light elements,
+PBHs with M ∼1010 g having a lifetime τ ∼103 s and therefore evaporating at the big bang nucleosynthesis (BBN) epoch. Injection of
+high-energy neutrinos and antineutrinos changes the weak interaction freeze-out time and hence the neutron-to-proton ratio at the onset
+of BBN, modifying 4He production. PBHs with M = 1010 – 1013 g evaporated after BBN, increasing the baryon-to-entropy ratio present
+at nucleosynthesis and resulting in overproduction of 4He and underproduction of D. Emission of high-energy nucleons and antinucleons
+increases the primordial deuterium abundance due to the capture of free neutrons by protons and spallation of 4He. The emission of photons
+by PBHs with M > 1010 g dissociates the deuterons produced in nucleosynthesis. The associated constraints on β(M) are discussed later.
+PBHs were also invoked to explain certain observations. For example, evaporating PBHs of around 1015 g might explain the 511 keV
+annihilation line radiation from the Galactic centre or antiprotons in c

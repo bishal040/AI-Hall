@@ -1,0 +1,196 @@
+TEACHING LARGE LANGUAGE MODELS TO SELF-
+DEBUG
+Xinyun Chen1
+Maxwell Lin2
+Nathanael Schärli1
+Denny Zhou1
+1 Google DeepMind
+2 UC Berkeley
+{xinyunchen,schaerli,dennyzhou}@google.com, mxlin@berkeley.edu
+ABSTRACT
+Large language models (LLMs) have achieved impressive performance on code
+generation. However, for complex programming tasks, generating the correct
+solution in one go becomes challenging, thus some prior works have designed
+program repair approaches to improve code generation performance. In this work,
+we propose SELF-DEBUGGING, which teaches a large language model to debug
+its predicted program via few-shot demonstrations. In particular, we demonstrate
+that SELF-DEBUGGING can teach the large language model to perform rubber
+duck debugging; i.e., without any human feedback on the code correctness or error
+messages, the model is able to identify its mistakes by investigating the execution
+results and explaining the generated code in natural language. SELF-DEBUGGING
+achieves the state-of-the-art performance on several code generation benchmarks,
+including the Spider dataset for text-to-SQL generation, TransCoder for C++-
+to-Python translation, and MBPP for text-to-Python generation. On the Spider
+benchmark where there are no unit tests to verify the correctness of predictions,
+SELF-DEBUGGING with code explanation consistently improves the baseline by
+2 −3%, and improves the prediction accuracy on problems of the hardest level by
+9%. On TransCoder and MBPP where unit tests are available, SELF-DEBUGGING
+improves the baseline accuracy by up to 12%. Meanwhile, by leveraging feedback
+messages and reusing failed predictions, SELF-DEBUGGING notably improves
+sample efficiency, and can match or outperform baseline models that generate more
+than 10× candidate programs.
+1
+INTRODUCTION
+Code generation has been a long-standing challenge with a variety of applications, such as code
+synthesis from natural languages (Yu et al., 2018; Chen et al., 2021a; Austin et al., 2021; Li et al.,
+2022), programming by examples (Devlin et al., 2017; Bunel et al., 2018; Chen et al., 2019), and
+code translation (Roziere et al., 2020; Chen et al., 2018). In particular, recent large language models
+have demonstrated a significant leap in improvement over prior deep neural networks (Chen et al.,
+2021a; Nijkamp et al., 2023; Zheng et al., 2023; Xu et al., 2022). However, for many programming
+tasks, generating correct code with a single attempt is challenging. Inspired by observations that
+correct code is much more likely to be predicted when multiple programs are sampled from the
+model (Chen et al., 2021a; Chowdhery et al., 2022; Li et al., 2022), one line of work has designed
+reranking techniques to select the best candidate from multiple samples, which typically requires tens
+of samples to start with (Shi et al., 2022; Zhang et al., 2022; Ni et al., 2023; Li et al., 2022).
+Intuitively, even for human programmers, there is no guarantee that the code written on the first
+try is always accurate. Instead of completely discarding the incorrect code, humans typically look
+into the code and investigate execution results, then make changes to resolve the implementation
+errors. Therefore, prior works propose deep learning techniques to repair the predicted code, which
+demonstrate notable performance gains on various coding tasks (Gupta et al., 2020; Wang et al.,
+2018; Fu et al., 2019; Chen et al., 2023a). However, these approaches require additional training for
+the code repair model. While some recent works show that large language models have potential
+for generating feedback messages to critique and refine their outputs for some natural language and
+reasoning domains (Shinn et al., 2023; Madaan et al., 2023b; Kim et al., 2023; Bai et al., 2022), prior
+1
+arXiv:2304.05128v2  [cs.CL]  5 Oct 2023
+Teaching Large Language Models to Self-Debug
+works suggest that such large language models are not yet capable of correcting code when lacking
+external feedback, such as unit tests or human instructions (Chen et al., 2023a).
+In this work, we propose SELF-DEBUGGING, where we teach the large language model to debug
+its own predicted code via few-shot prompting. Without any additional model training, SELF-
+DEBUGGING instructs the model to execute the code, then generate a feedback message based on
+the code and its execution result. Different from prior works on utilizing human feedback for code
+repair, where the feedback message explains the code errors and how to fix them (Chen et al., 2023a;
+Austin et al., 2021), SELF-DEBUGGING teaches the model to identify the implementation errors
+via investigating into execution results and explaining the code by itself. This debugging process is
+reminiscent of rubber duck debugging for human programmers, where explaining the code line-by-
+line in natural language to a rubber duck significantly boosts debugging efficiency without expert
+guidance (Hunt & Thomas, 2000). Figure 1 illustrates the full procedure of SELF-DEBUGGING.
+We evaluate SELF-DEBUGGING on a variety of models, including code-davinci-002 (Chen
+et al., 2021a), gpt-3.5-turbo, gpt-4 (OpenAI, 2023) in the GPT model family, as well as
+StarCoder (Li et al., 2023b), a strong open-source LLM for code generation. SELF-DEBUGGING
+achieves the state-of-the-art performance on different types of code generation tasks, including text-to-
+SQL generation, code translation and text-to-Python generation. On the Spider benchmark (Yu et al.,
+2018) for text-to-SQL generation where there are no unit tests in the problem description, with code
+explanation, SELF-DEBUGGING consistently improves the baseline by 2−3% with different numbers
+of initial programs, and improves the prediction accuracy on the most complicated SQL queries by
+9%. On both TransCoder for code translation (Roziere et al., 2020) and MBPP for text-to-Python
+generation (Austin et al., 2021), utilizing unit tests along with code explanation boosts the accuracy
+by up to 12%, and code explanation alone without debugging also consistently improves the code
+translation performance by 2 −3%. Meanwhile, SELF-DEBUGGING improves sample efficiency, and
+can match or outperform baseline models that sample more than 10× predictions. Our work indicates
+that besides improving their ability to generate code from scratch, teaching large language models to
+perform SELF-DEBUGGING without human guidance is another promising path to enhance coding
+capability and reduce the sampling cost required to accomplish challenging tasks.
+Model
+Executor
+Code
+Problem
+Explanation
+Unit tests
+Step 1: Code 
+generation
+Step 3: Code explanation
+Step 2: Code execution
+Feedback
+Figure 1: SELF-DEBUGGING for iterative debugging using a large language model. At each debug-
+ging step, the model first generates new code, then the code is executed and the model explains the
+code. The code explanation along with the execution results constitute the feedback message, based
+on which the model infers the code correctness and then adds this message to the feedback. The
+feedback message is then sent back to the model to perform more debugging steps. When unit tests
+are not available, the feedback can be purely based on code explanation.
+2
+PROMPTING FOR CODE GENERATION
+In this section, we discuss the background on prompting for code generation using large language
+models. We first introduce few-shot prompting, then discuss how to select the final prediction from
+multiple samples based on code execution.
+Few-shot prompting. Few-shot prompting instructs the language model to solve a task with several
+input-output demonstrations (Brown et al., 2020). Taking text-to-SQL generation as an example, the
+2
+Teaching Large Language Models to Self-Debug
+few-shot prompt prepends the question of interest with a list of (question, SQL) pairs, so that when
+the model is asked to predict subsequent tokens of the given prompt, it will follow the prompt format
+to generate the SQL query. Figure 2 presents one exemplar for the prompt. Besides input-output
+demonstrations, we can optionally add an instruction in the prompt to provide a high-level task
+description (Ouyang et al., 2022; Sanh et al., 2022; Suzgun et al., 2022). For example, in the first two
+steps of our SELF-DEBUGGING prompt shown in Figure 3, both prompts start with instructions that
+ask the model to generate explanations. We provide the full few-shot prompts in the appendix.
+Execution-based code selection. Prior works demonstrate that decoding multiple samples can
+significantly improve the performance of large language models (Wang et al., 2023; Shi et al.,
+2022). In particular, for code generation tasks, we can utilize code execution to select the final
+prediction (Chen et al., 2019; Li et al., 2022; Shi et al., 2022; Zhang et al., 2022; Ni et al., 2023).
+One line of work selects the final prediction using the majority vote of execution results (Chen et al.,
+2019; Li et al., 2022; Shi et al., 2022), while other works design reranking schemes to improve the
+performance (Zhang et al., 2022; Ni et al., 2023; Yin & Neubig, 2019; Zeng et al., 2022). In this
+work, when there are multiple predictions, we follow the first line of work to select the predicted code
+with the most frequent execution result among those that do not encounter execution errors, then
+apply SELF-DEBUGGING to the code.
+Some code generation tasks are accompanied with unit tests to specify the program execution
+behavior (Chen et al., 2021a; Austin et al., 2021; Li et al., 2022; Hendrycks et al., 2021). Specifically,
+the unit tests are a set of input-output pairs {(ik, ok)}K
+k=1, and a program P passes unit tests when
+P(ik) = ok, ∀k ∈{1, ..., K}. When unit tests are presented in the problem description, we filter out
+programs that do not pass the unit tests before performing the execution-based majority vote.
+3
+SELF-DEBUGGING FRAMEWORK
+Figure 1 illustrates our SELF-DEBUGGING framework for iterative debugging, where we utilize a
+pretrained large language model without finetuning it. One turn of SELF-DEBUGGING consists of 3
+steps: Generation, Explanation, and Feedback.
+• For the Generation step, given the problem description, the model predicts candidate programs.
+• During the Explanation step, the model is prompted to process the predictions in a semantically
+useful way, such as explaining the prediction in natural language, or creating an execution trace
+of the predicted code for a sample input.
+• Finally, for the Feedback step, a feedback message concerning the correctness of the predicted
+code is generated. This can be determined by asking the model itself, or can be generated
+externally from unit tests.
+The debugging process terminates when the feedback message states that the prediction is correct, or
+a maximum allowed number of debugging turns is reached.
+In practice, a SELF-DEBUGGING turn does not always include all steps above. We discuss different
+types of feedback that can be automatically acquired and generated for SELF-DEBUGGING below.
+Simple feedback. The simplest form of automatic feedback is a sentence that just indicates the
+code correctness without more detailed information, which omits the Explanation step in a full
+SELF-DEBUGGING turn. For instance, in text-to-SQL generation, the few-shot prompt provides the
+feedback message “The SQL prediction above is correct!” for all correct SQL queries, and “The
+SQL prediction above is wrong. Please fix the SQL.” for wrong predictions.
+Unit test feedback (UT). For code generation tasks where the problem description includes unit tests,
+besides utilizing code execution to check code correctness, we can also incorporate the execution
+results in the feedback, which provides richer information for debugging. Figure 5 presents a sample
+unit test feedback message. Intuitively, inspecting runtime errors and execution results of failed unit
+tests also helps human programmers debug more effectively. In our experiments, we will demonstrate
+that leveraging unit tests whenever available consistently boosts the SELF-DEBUGGING performance.
+Code Explanation feedback (Expl). Despite recent promising progress showing that large language
+models can generate critiques to avoid harmful model outputs (Ganguli et al., 2023; Bai et al., 2022)
+and improve their performance on some natural language tasks (Shinn et al., 2023; Kim et al., 2023;
+3
+Teaching Large Language Models to Self-Debug
+Saunders et al., 2022), prior work has yet to show the effectiveness of model-generated feedback on
+code generation (Chen et al., 2023a). On the other hand, large language models have been shown
+to be capable of describing their generated problem solutions in both text (Wei et al., 2022; Kojima
+et al., 2022; Zhou et al., 2023) and code (Gao et al., 2022; Chen et al., 2022) formats.
+Inspired by these observations, instead of teaching the large language model to predict error messages,
+we propose SELF-DEBUGGING via explaining the generated code. This debugging process is
+reminiscent of rubber duck debugging, where a programmer debugs code by explaining it line-by-line
+to a rubber duck (Hunt & Thomas, 2000). By describing the code implementation and comparing it
+to the problem description, human programmers are usually able to identify the bugs without extra
+guidance. Empirically, we observe that a large language model can also benefit from rubber duck
+debugging, especially when unit tests are not available.
+Execution trace feedback (Trace). Besides explaining the code itself, human programmers also
+often understand the code semantic meaning by simulating the execution process. Prior work on code
+repair has demonstrated that training the repair model on execution traces improves the debugging
+performance (Wang et al., 2018; Gupta et al., 2020). Therefore, when unit tests are available, we
+examine another explanation feedback format where the LLM is instructed to explain the intermediate
+execution steps line-by-line. Note that both the execution trace and the line-by-line explanation come
+from model generation instead of code execution, thus the trace feedback does not require more
+information than the pure code explanation feedback; i.e., no access to intermediate execution states.
+4
+APPLICATIONS
+In our evaluation, we showcase applications of SELF-DEBUGGING to different code generation
+domains: text-to-SQL generation, code translation, and text-to-Python generation. First, text-to-SQL
+generation represents the scenario where no unit tests are available, where SELF-DEBUGGING enables
+the model to identify errors and justify code correctness by explaining the predicted code. In code
+translation, we demonstrate how to utilize the execution of unit tests to provide feedback messages.
+Finally, the text-to-Python domain requires the model to infer prediction correctness when only a
+subset of unit tests are presented in the problem description.
+4.1
+TEXT-TO-SQL GENERATION
+The goal of text-to-SQL tasks is to generate the corresponding SQL query given a question 
